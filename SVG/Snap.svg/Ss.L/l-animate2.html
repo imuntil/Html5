@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title></title>
+    <script src="../Snap.svg-0.3.0/dist/snap.svg.js"></script>
+</head>
+<body>
+<svg id="svg" width="600" height="400"></svg>
+<input id="button" type="button" value="click">
+<script>
+    var rect = Snap('#svg').paper.rect(0,0,60,40);
+    document.getElementById('button').onclick = function() {
+        Snap.animate([0,0], [200,300], function(val) {
+            rect.attr({
+                y:val[0],
+                x:val[1]
+            });
+        }, 1000);
+    }
+
+    var bound1 = Snap.path.bezierBBox(20,80, 40,40, 60,40, 80,80);
+    console.log(bound1);
+</script>
+</body>
+</html>

@@ -1,0 +1,171 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>购买大厅</title>
+    <script src="../jquery-2.1.0.min.js"></script>
+<body style="background-color: #514f4f;overflow: hidden;">
+<!--<div class="nav" style="height:43px;line-height:43px;background-color: #CC0000;display:block;"><p>幸运大转盘</p>-->
+    <!--<span class="bank"><a href="javascript:window.history.go(-1);" class="hand">返回</a></span>-->
+<!--</div>-->
+<!--<div style="width: 100%;padding-top:50px;">-->
+    <!--<p style="margin:0px auto;line-height:20px;padding:5px 5px;width:95%;color: #747373;font-size:14px;background-color: #dedede;">-->
+        <!--游戏规则：每次转动消费10积分,中奖后系统记录,客服会与您第一时间取得联系！-->
+    <!--</p>-->
+<!--</div>-->
+<div style="padding:5px 0px 0px 15px;">
+    <p>
+        <!--<span style="font-size:16px;color:#fff;position: relative;top:10px;">当前积分1000</span>-->
+        <input id="spinBtn" type="button" onclick="spin();" value="开始抽奖" class="luckBtn" style="margin-top: 3px;">
+    </p>
+</div>
+<div style="width: 100%;text-align: center;margin:0px auto;">
+    <canvas id="wheelcanvas" width="500" height="500"></canvas>
+</div>
+<script src="stopwatch.js"></script>
+<script src="animationTimer.js"></script>
+<script src="Sprite.js"></script>
+<script src="requestNextAnimationFrame.js"></script>
+
+<script type="application/javascript">
+    var colors = ["#B8D430", "#3AB745", "#029990", "#3501CB",
+        "#2E2C75", "#673A7E", "#CC0071", "#F80120",
+        "#F35B20", "#FB9A00", "#FFCC00", "#FEF200"];
+    var restaraunts = ["X2", "X4", "X5", "继续努力","双色球一注","5000元现金","iphone6一台","苹果笔记本一台"];
+
+    var canvas = document.getElementById('wheelcanvas'),
+            context = canvas.getContext('2d'),
+
+            spinBtn = document.getElementById('spinBtn'),
+
+            EASEOUT = AnimationTimer.makeEaseOut(4),
+            ROTATE_ANIMATION_DURATION = 10000,
+            WHEEL_LEFT = 250,
+            WHEEL_RIGHT = 250,
+            OUTSIDE_RADIUS = WHEEL_LEFT*0.8,
+            TEXT_RADIUS = WHEEL_LEFT*160/WHEEL_LEFT,
+            INSIDE_RADIUS = WHEEL_LEFT*12/WHEEL_LEFT,
+            ARC = 2*Math.PI/restaraunts.length,
+            BEFORE_STOP_ANGLE = Math.PI*2*15/16,
+
+            lastTime = 0,
+
+            rotateAnimationTimer = new AnimationTimer(ROTATE_ANIMATION_DURATION),
+
+            rotateWheel = {
+                lastTime : undefined,
+                beforeStopAngle:0,
+                stopAngle:0,
+
+                updateWheelAngle : function(elapsed) {
+
+                    if (wheel.angleVelocity * (elapsed/1000) < 0.04) {
+
+                        if (this.stopAngle == 0) {
+                            this.stopAngle = Math.PI*2 - wheel.rotateAngle % (2*Math.PI) + BEFORE_STOP_ANGLE;
+                        }
+
+                        wheel.rotateAngle += 0.03;
+                        this.beforeStopAngle += 0.03;
+
+                    } else {
+
+                        wheel.rotateAngle += wheel.angleVelocity * (elapsed/1000);
+
+                    }
+                },
+
+                execute : function(wheel, context, time) {
+                    if (rotateAnimationTimer.isRunning()) {
+                        var animationElapsed = rotateAnimationTimer.getElapsedTime(), elapsed;
+                        if (this.lastTime !== undefined) {
+                            elapsed = animationElapsed - this.lastTime;
+
+                            if (this.beforeStopAngle < BEFORE_STOP_ANGLE || this.beforeStopAngle < this.stopAngle) {
+                                this.updateWheelAngle(elapsed);
+                            } else {
+                                rotateAnimationTimer.stop();
+                                console.log(wheel.rotateAngle);
+                            }
+                        }
+                    }
+                    this.lastTime = animationElapsed;
+                }
+            },
+
+            wheel = new Sprite('wheel', {
+                paint : function(sprite, context) {
+                    context.save();
+                    context.strokeStyle = '#CFCFCF';
+                    context.lineWidth = 2;
+
+                    context.font = 'bold 16px sans-serif';
+                    context.fillStyle = '#fff';
+                    context.arc(WHEEL_LEFT, WHEEL_RIGHT, OUTSIDE_RADIUS+15, 0, 2*Math.PI, true);
+                    context.stroke();
+                    context.fill();
+                    context.save();
+                    for(var i = 0; i < restaraunts.length; i++) {
+                        var angle = sprite.rotateAngle + i*ARC - Math.PI/2;
+
+                        context.fillStyle = colors[i];
+                        context.beginPath();
+                        context.arc(WHEEL_LEFT, WHEEL_RIGHT, OUTSIDE_RADIUS, angle, angle + ARC, false);
+                        context.arc(WHEEL_LEFT, WHEEL_LEFT, INSIDE_RADIUS, angle + ARC, angle, true);
+                        context.stroke();
+                        context.fill();
+                        context.save();
+
+                        context.fillStyle = '#fff';
+                        context.translate(WHEEL_LEFT + Math.cos(angle + ARC/2) * TEXT_RADIUS,
+                           WHEEL_RIGHT + Math.sin(angle + ARC/2) * TEXT_RADIUS);
+                        context.rotate(angle + ARC/2 + Math.PI/2);
+                        var text = restaraunts[i];
+                        context.fillText(text, -context.measureText(text).width/2, 0);
+                        context.restore();
+                    }
+
+                    context.fillStyle = 'white';
+                    context.beginPath();
+                    context.moveTo(WHEEL_LEFT - 4, WHEEL_LEFT - (OUTSIDE_RADIUS + 5));
+                    context.lineTo(WHEEL_LEFT + 4, WHEEL_LEFT - (OUTSIDE_RADIUS + 5));
+                    context.lineTo(WHEEL_LEFT + 4, WHEEL_LEFT - (OUTSIDE_RADIUS - 5));
+                    context.lineTo(WHEEL_LEFT + 9, WHEEL_LEFT - (OUTSIDE_RADIUS - 5));
+                    context.lineTo(WHEEL_LEFT + 0, WHEEL_LEFT - (OUTSIDE_RADIUS - 23));
+                    context.lineTo(WHEEL_LEFT - 9, WHEEL_LEFT - (OUTSIDE_RADIUS - 5));
+                    context.lineTo(WHEEL_LEFT - 4, WHEEL_LEFT - (OUTSIDE_RADIUS - 5));
+                    context.lineTo(WHEEL_LEFT - 4, WHEEL_LEFT - (OUTSIDE_RADIUS + 5));
+                    context.fill();
+                }
+            }, [rotateWheel]);
+
+    rotateAnimationTimer.timeWarp = EASEOUT;
+
+    function calculateFps(time) {
+        var fps = 1000 / (time - lastTime);
+        lastTime = time;
+        return fps;
+    }
+
+    function animate(time) {
+        fps = calculateFps(time);
+
+        context.clearRect(0, 0, canvas.width, canvas.height);
+
+        wheel.update(context, time);
+        wheel.paint(context);
+
+        window.requestNextAnimationFrame(animate);
+    }
+
+    window.requestNextAnimationFrame(animate);
+    wheel.angleVelocity = 20;
+
+    spinBtn.onclick = function() {
+        rotateAnimationTimer.start();
+    }
+
+</script>
+</body>
+</html>

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title></title>
+    <script src="http://code.jquery.com/jquery-1.10.2.min.js" type="text/javascript"></script>
+    <!--<script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js" type="text/javascript"></script>-->
+    <script>
+        $(function() {
+            function hitpath(context, event) {
+                var cc = context.canvas;
+
+                var bb = canvas.getBoundingClientRect();
+                console.log(bb);
+
+                var x = (event.clientX-bb.left)*(cc.width/bb.width);
+                var y = (event.clientY-bb.top)*(cc.height/bb.height);
+
+                console.log('x: ' + x +'  y: ' + y);
+//                console.log(context.isPointInPath(x, y));
+
+                return context.isPointInPath(x, y);
+            }
+
+
+            function hitpaint(context, event) {
+                var cc = context.canvas;
+
+                var bb = canvas.getBoundingClientRect();
+
+                var x = (event.clientX-bb.left)*(cc.width/bb.width);
+                var y = (event.clientY-bb.top)*(cc.height/bb.height);
+
+                var pixels = context.getImageData(x, y, 1, 1);
+
+                for (var i=3; i < pixels.data.length; i+=4) {
+                    if (pixels.data[i] !== 0) return true;
+                }
+
+                return false;
+            }
+
+            var canvas = document.getElementById('canvas'),
+                    cxt = canvas.getContext('2d');
+            var img = new Image();
+            img.src = '../abcd.jpg';
+            img.onload = function() {
+                canvas.width = img.naturalWidth;
+                canvas.height = img.naturalHeight;
+                cxt.rect(0, 0, canvas.width, canvas.height);
+                cxt.stroke();
+                cxt.drawImage(img, 0, 0);
+
+                canvas.onclick = function(event) {
+                    if (hitpath(cxt, event)) {
+                        alert('hit');
+                    }
+                }
+            }
+
+
+        });
+    </script>
+</head>
+<body>
+<canvas id="canvas"></canvas>
+</body>
+</html>

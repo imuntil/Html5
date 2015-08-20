@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title></title>
+    <script src="../EaselJS-master/lib/easeljs-NEXT.combined.js"></script>
+    <script>
+        var stage;
+        function init() {
+            var image = new Image();
+            image.src = '../EaselJS-master/_assets/art/flowers.jpg';
+            image.onload = imgLoad;
+        }
+        function imgLoad(e) {
+            stage = new createjs.Stage('canvas');
+
+            var _w = e.target.naturalWidth / stage.canvas.width,
+                _h = e.target.naturalHeight / stage.canvas.height;
+
+            var _p = _w > _h ? 1/_w : 1/_h;
+
+            var bitmap = new createjs.Bitmap(e.target);
+            bitmap.setTransform(0, 0, _p, _p);
+            stage.addChild(bitmap);
+            stage.update();
+        }
+    </script>
+</head>
+<body onload="init()">
+<canvas id="canvas" width="600" height="400"></canvas>
+<img src="../EaselJS-master/_assets/art/flowers.jpg">
+</body>
+</html>

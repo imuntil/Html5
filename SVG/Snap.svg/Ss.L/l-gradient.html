@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title></title>
+
+    <script src="../Snap.svg-0.3.0/dist/snap.svg.js"></script>
+</head>
+<body>
+<svg id="svg" width="300" height="100"></svg>
+
+<script>
+    var svg = Snap("#svg");
+//    var g1 = svg.paper.gradient("l(0, 0, 1, 1)#000-#f00-#fff");
+//    svg.paper.circle(50, 50, 40).attr({
+//        fill: g1
+//    });
+    var g2 = svg.paper.gradient("L(0, 0, 100, 100)#000-#f00:25-#2cd");
+    svg.paper.circle(150, 50, 40).attr({
+        fill: g2
+    });
+//    var g3 = svg.paper.gradient("r(0.5, 0.5, 0.5)#000-#fff");
+//    svg.paper.circle(250, 50, 40).attr({
+//        fill: g3
+//    });
+
+    console.log(Snap.angle(10, 10, 10, 30));
+</script>
+</body>
+</html>

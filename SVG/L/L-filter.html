@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title></title>
+</head>
+<body>
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="600" height="400">
+    <defs>
+        <filter id="f1" x="0" y="0" width="200%" height="200%">
+            <feOffset result="offOut" in="SourceGraphic" dx="20" dy="30"></feOffset>
+            <feGaussianBlur result="blurOut" in="offOut" stdDeviation="10"></feGaussianBlur>
+            <feBlend in="SourceGraphic" in2="blurOut" mode="normal"></feBlend>
+        </filter>
+    </defs>
+    <rect width="90" height="90" x="20" y="20" stroke="green" stroke-width="3" fill="yellow" filter="url(#f1)"></rect>
+</svg>
+
+
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="600" height="400">
+    <defs>
+        <filter id="f2" x="0" y="0" width="200%" height="200%">
+            <feOffset result="offOut" in="SourceGraphic" dx="20" dy="30"></feOffset>
+            <feColorMatrix result="matrixOut" in="offOut" type="matrix" values="
+            0.2 0   0   0   0
+            0   0.2 0   0   0
+            0   0   0.2 0   0
+            0   0   0   1   0
+            "></feColorMatrix>
+            <feGaussianBlur result="blurOut" in="matrixOut" stdDeviation="10"></feGaussianBlur>
+            <feBlend in="SourceGraphic" in2="blurOut" mode="normal"></feBlend>
+        </filter>
+    </defs>
+    <rect width="90" height="90" stroke="green" stroke-width="3" fill="yellow" filter="url(#f2)"></rect>
+</svg>
+</body>
+</html>

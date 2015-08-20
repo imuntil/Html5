@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title></title>
+    <script src="jinsan/jquery-2.1.0.min.js"></script>
+</head>
+<body>
+<canvas id="canvas" width="323" height="149"></canvas>
+<input type="button" value="reset" id="reset">
+
+<script>
+    var scratchGame = {
+        loadings   :0,
+        imgLoaded  :false,
+        wasCleared :false,
+        lineWidth  :30,
+        upimg      :{url:'jinsan/canvas-cover.png',img:null},
+        downimg    :{url:'jinsan/get.png',img:null},
+        downimg2   :{url:'jinsan/miss.png',img:null},
+        downimg3   :{url:'jinsan/get.png',img:null},
+        points     :[{x:101,y:80},{x:140,y:60},{x:141,y:98},{x:59,y:102},{x:59,y:57}]
+    };
+    scratchGame.canvas = document.getElementById('canvas');
+
+    scratchGame.canvas.width      = $('#canvas').width();
+    scratchGame.canvas.height     = $('#canvas').height();
+    $('#canvas').width(scratchGame.canvas.width);
+    $('#canvas').height(scratchGame.canvas.height);
+
+    scratchGame.points = [
+        {x:scratchGame.canvas.width/2,y:scratchGame.canvas.height/2},
+        {x:scratchGame.canvas.width/3,y:scratchGame.canvas.height/3},
+        {x:scratchGame.canvas.width/3*2,y:scratchGame.canvas.height/3},
+        {x:scratchGame.canvas.width/3,y:scratchGame.canvas.height/3*2},
+        {x:scratchGame.canvas.width/3*2,y:scratchGame.canvas.height/3*2}
+    ];
+
+    scratchGame.cxt               = scratchGame.canvas.getContext('2d');
+
+    scratchGame.up_canvas         = document.createElement('canvas');
+    scratchGame.up_canvas.width   = scratchGame.canvas.width;
+    scratchGame.up_canvas.height  = scratchGame.canvas.height;
+    scratchGame.up_cxt            = scratchGame.up_canvas.getContext('2d');
+
+
+    scratchGame.scratch = function(x, y, fresh) {
+
+        if(scratchGame.wasCleared) return;
+
+        scratchGame.cxt.clearRect(0, 0, scratchGame.cxt.canvas.width, scratchGame.cxt.canvas.height);
+        scratchGame.up_cxt.lineWidth = scratchGame.lineWidth;
+        scratchGame.up_cxt.lineCap = scratchGame.up_cxt.lineJoin = 'round';
+        if (fresh) {
+            scratchGame.up_cxt.beginPath();
+            scratchGame.up_cxt.moveTo(x+0.01, y);
+        }
+        scratchGame.up_cxt.lineTo(x, y);
+        scratchGame.up_cxt.stroke();
+
+        scratchGame.cxt.drawImage(scratchGame.downimg.img, 0, 0, scratchGame.downimg.img.width, scratchGame.downimg.img.height, 0, 0, scratchGame.canvas.width, scratchGame.canvas.height);
+        scratchGame.cxt.drawImage(scratchGame.up_canvas, 0, 0);
+    };
+
+    scratchGame.setupCanvas = function() {
+        var mouseDown = false;
+
+        function layer() {
+            scratchGame.up_cxt.drawImage(scratchGame.upimg.img, 0, 0, scratchGame.upimg.img.width, scratchGame.upimg.img.height, 0, 0, scratchGame.up_canvas.width, scratchGame.up_canvas.height);
+            scratchGame.cxt.drawImage(scratchGame.up_canvas, 0, 0);
+        }
+
+        function touchBeginHandle(e) {
+            if (scratchGame.wasCleared) return;
+            e.preventDefault();
+            mouseDown = true;
+            var local = scratchGame.getLocalCoords(canvas, e);
+            console.log('{x:' + local.x + ',' + 'y:' + local.y + '},');
+            scratchGame.scratch(local.x, local.y, true);
+            scratchGame.scratchSpace(local.x,local.y);
+        }
+
+
+        function touchMoveHandle(e) {
+            if (scratchGame.wasCleared) return;
+            e.preventDefault();
+            if (mouseDown) {
+                if(e.changedTouches) {
+                    e = e.changedTouches[e.changedTouches.length - 1];
+                }
+                var local = scratchGame.getLocalCoords(canvas,e);
+
+                scratchGame.scratch(local.x, local.y, false);
+                scratchGame.scratchSpace(local.x,local.y);
+            }
+        }
+
+        function touchEndHandle(e) {
+            if (scratchGame.wasCleared) return;
+            e.preventDefault();
+            mouseDown = false;
+            if (scratchGame.points.length === 0) {
+                alert('-.-');
+                scratchGame.wasCleared = true;
+            }
+        }
+
+        scratchGame.cxt.drawImage(scratchGame.downimg.img, 0, 0, scratchGame.downimg.img.width, scratchGame.downimg.img.height, 0, 0, scratchGame.canvas.width, scratchGame.canvas.height);
+
+        layer();
+
+        scratchGame.up_cxt.globalCompositeOperation = 'destination-out';
+//        var touchArea = document.getElementById('canvas_content');
+        window.addEventListener('mousedown', touchBeginHandle, false);
+        window.addEventListener('touchstart', touchBeginHandle, false);
+        window.addEventListener('mousemove', touchMoveHandle, false);
+        window.addEventListener('touchmove', touchMoveHandle, false);
+        window.addEventListener('mouseup', touchEndHandle, false);
+        window.addEventListener('touchend', touchEndHandle, false);
+    };
+
+    scratchGame.getLocalCoords = function(elem, ev) {
+        var ox = 0, oy = 0;
+        var first;
+        var pageX, pageY;
+        while (elem != null) {
+            ox += elem.offsetLeft;
+            oy += elem.offsetTop;
+            elem = elem.offsetParent;
+        }
+        if (ev.hasOwnProperty('changedTouches')) {
+            first = ev.changedTouches[0];
+            pageX = first.pageX;
+            pageY = first.pageY;
+        } else {
+            pageX = ev.pageX;
+            pageY = ev.pageY;
+        }
+        return { 'x': pageX - ox, 'y': pageY - oy };
+    };
+
+    scratchGame.scratchSpace = function(x,y) {
+        if (scratchGame.points.length === 0) {return};
+        var point = {x:x,y:y};
+        var _width = scratchGame.lineWidth/2;
+        if (scratchGame.points.length > 0) {
+            for (var i = 0; i < scratchGame.points.length; i++) {
+                if(scratchGame.points[i].x > point.x-_width &&
+                        scratchGame.points[i].x < point.x-(-_width) &&
+                        scratchGame.points[i].y < point.y-(-_width) &&
+                        scratchGame.points[i].y > point.y-_width) {
+                    scratchGame.points.splice(i,1)
+                }
+            }
+        }
+    };
+
+    scratchGame.scratchAgain = function() {
+        scratchGame.cxt.clearRect(0 ,0 ,scratchGame.canvas.width, scratchGame.canvas.height);
+        scratchGame.cxt.drawImage(scratchGame.downimg.img, 0, 0, scratchGame.downimg.img.width, scratchGame.downimg.img.height, 0, 0, scratchGame.canvas.width, scratchGame.canvas.height);
+        scratchGame.up_cxt.globalCompositeOperation = 'source-over';
+        scratchGame.up_cxt.clearRect(0, 0, scratchGame.up_canvas.width, scratchGame.up_canvas.height);
+        scratchGame.up_cxt.drawImage(scratchGame.upimg.img, 0, 0, scratchGame.upimg.img.width, scratchGame.upimg.img.height, 0, 0, scratchGame.up_canvas.width, scratchGame.up_canvas.height);
+        scratchGame.up_cxt.globalCompositeOperation = 'destination-out';
+        scratchGame.cxt.drawImage(scratchGame.up_canvas, 0, 0);
+        scratchGame.wasCleared = false;
+        scratchGame.points = [
+            {x:scratchGame.canvas.width/2,y:scratchGame.canvas.height/2},
+            {x:scratchGame.canvas.width/3,y:scratchGame.canvas.height/3},
+            {x:scratchGame.canvas.width/3*2,y:scratchGame.canvas.height/3},
+            {x:scratchGame.canvas.width/3,y:scratchGame.canvas.height/3*2},
+            {x:scratchGame.canvas.width/3*2,y:scratchGame.canvas.height/3*2}
+        ];
+    };
+
+    scratchGame.loadingstimes = function() {
+        scratchGame.loadings ++;
+        if (scratchGame.loadings === 3) {
+            scratchGame.imgLoaded = true;
+
+            var r = Math.floor(Math.random()*10);
+            scratchGame.downimg = r % 2 === 0 ? scratchGame.downimg2 : scratchGame.downimg3;
+
+
+            scratchGame.setupCanvas();
+        }
+    };
+
+    scratchGame.upimg.img = document.createElement('img');
+    scratchGame.upimg.img.addEventListener('load', scratchGame.loadingstimes, false);
+    scratchGame.upimg.img.src = scratchGame.upimg.url;
+
+//    scratchGame.downimg.img = document.createElement('img');
+//    scratchGame.downimg.img.addEventListener('load', scratchGame.loadingstimes, false);
+//    scratchGame.downimg.img.src = scratchGame.downimg.url;
+
+    scratchGame.downimg2.img = document.createElement('img');
+    scratchGame.downimg2.img.addEventListener('load', scratchGame.loadingstimes, false);
+    scratchGame.downimg2.img.src = scratchGame.downimg2.url;
+
+    scratchGame.downimg3.img = document.createElement('img');
+    scratchGame.downimg3.img.addEventListener('load', scratchGame.loadingstimes, false);
+    scratchGame.downimg3.img.src = scratchGame.downimg3.url;
+
+    $('#reset').click(function() {
+        var r = Math.floor(Math.random()*10);
+        scratchGame.downimg = r % 2 === 0 ? scratchGame.downimg2 : scratchGame.downimg3;
+
+        console.log(scratchGame.downimg);
+        scratchGame.scratchAgain();
+    });
+</script>
+</body>
+</html>

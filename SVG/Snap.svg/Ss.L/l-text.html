@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title></title>
+    <script src="../Snap.svg-0.3.0/dist/snap.svg-min.js"></script>
+</head>
+<body>
+<svg id="svg" width="700" height="400"></svg>
+<script>
+    var svg = Snap('#svg');
+    var c = Snap.fragment('<path id="path1" d="M75,20 a1,1 0 0,0 100,0" style="stroke:red;stroke-width:1;"></path>');
+    svg.append(c);
+    var cc = svg.select('#path1');
+    cc.attr({fill:'none'});
+    cc.toDefs();
+//    var t = Snap.fragment('<text x="10" y="100"><textPath xlink:href="#path1">i love svg i love svg</textPath></text>')
+//    svg.append(t);
+//    svg.select('text').attr({
+//        stroke:'none',
+//        fill:'blue',
+//        'font-family':'Microsoft Yahei',
+//        'font-weight':'bold'
+//    });
+    var p = svg.paper.path('M60,100L200,200L130,220z').attr({
+        fill:'none',
+        stroke:'red',
+        id:'path2'
+    });
+    svg.append(p);
+
+    p.toDefs();
+    var t = Snap.fragment('<text x="10" y="100"><textPath xlink:href="#path2">i love svg i love svg</textPath></text>')
+    svg.append(t);
+    svg.select('text').attr({
+        stroke:'none',
+        fill:'blue',
+        'font-family':'Microsoft Yahei',
+        'font-weight':'bold'
+    });
+
+</script>
+</body>
+</html>

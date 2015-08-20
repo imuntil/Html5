@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title></title>
+    <script src="../Snap.svg-0.3.0/dist/snap.svg.js"></script>
+
+</head>
+<body>
+<svg id="svg1" width="200" height="100"></svg>
+<!--<svg id="svg2" width="100" height="100"></svg>-->
+
+<input id="button" tppe="button" value="点击改变圈圈的顺序">
+
+<script>
+    var svg = Snap('#svg1');
+    var c1 = svg.paper.circle(50, 50, 40).attr({
+        fill:'#f00'
+    });
+    var c2 = svg.paper.circle(100, 40, 30).attr({
+        fill:'#00f'
+    });
+
+    document.querySelector('#button').addEventListener('click', function() {
+        c2.after(c1);
+    });
+</script>
+</body>
+</html>

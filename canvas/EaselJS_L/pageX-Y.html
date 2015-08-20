@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title></title>
+    <script src="../EaselJS-master/lib/easeljs-NEXT.combined.js"></script>
+    <script>
+        var canvas, stage;
+        function init() {
+            canvas = document.getElementById('testCanvas');
+            stage = new createjs.Stage(canvas);
+
+            stage.enableDOMEvents(true);
+            stage.addEventListener("stagemousedown", mouseDown);
+
+            canvas.onmousedown = mouseDown2;
+        }
+
+        function mouseDown(event) {
+            console.log('.............stage..............');
+            console.log(event);
+        }
+
+        function mouseDown2(event) {
+            console.log('----------------canvas------------');
+            console.log(event);
+        }
+    </script>
+    <script>
+
+        var _n = '413001199112174010';
+
+
+
+        function IDvf(_n) {
+
+            var _nx = ('7－9－10－5－8－4－2－1－6－3－7－9－10－5－8－4－2').split('－');
+            var _an = _n.split('');
+            var _vf = ('1－0－X－9－8－7－6－5－4－3－2').split('－');
+            var _sum = 0;
+
+            var _r = /^(\d{17}(\d|X|x))$/;
+
+            if (_n.length != 18) {
+                return false;
+            }
+
+            if (!_r.test(_n)) {
+                return false;
+            }
+
+
+            for (var i = 0; i < _nx.length; i++) {
+                _sum += _nx[i]*_an[i];
+            }
+
+            if (_an[17].toUpperCase() == _vf[_sum%11]) {
+
+                return true;
+            }
+
+            return false;
+        }
+
+
+        function inputing(selector) {
+//            var p = /^\d+(\d|(\.[1-9]{1,2}))$/;
+            $(selector).blur(function() {
+                var v = $(this).val();
+
+                if (v.length >= 18) {
+                    IDvf(v);
+                }
+
+            }).keyup(function(e) {
+                        $(this).triggerHandler('blur');
+                    })
+                    .focus(function() {
+                        $(this).triggerHandler('blur');
+                    });
+        };
+
+        console.log(IDvf(_n));
+    </script>
+</head>
+<body onload="init()">
+<canvas id="testCanvas" width="960" height="400"></canvas>
+</body>
+</html>

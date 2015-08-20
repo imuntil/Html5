@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title></title>
+    <script src="http://code.jquery.com/jquery-1.10.2.min.js" type="text/javascript"></script>
+    <!--<script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js" type="text/javascript"></script>-->
+    <style>
+        body {
+            background: #dddddd;
+        }
+
+        #canvas {
+            background: #ffffff;
+            cursor: pointer;
+            margin: 10px 0px 0px 10px;
+            -webkit-box-shadow: 3px 3px 6px rgba(0, 0, 0, 0.5);
+            -moz-box-shadow: 3px 3px 6px rgba(0, 0, 0, 0.5);
+            box-shadow: 3px 3px 6px rgba(0, 0, 0, 0.5);
+        }
+
+        #controls {
+            margin: 10px 0px 0px 15px;
+        }
+    </style>
+</head>
+<body>
+<div id="controls">
+    <input id="animateBtn" type="button" value="Animate" />
+</div>
+<canvas id="canvas" width="750" height="500"></canvas>
+
+<script src="requestNextAnimationFrame.js"></script>
+<script type="text/javascript">
+
+    var canvas = document.getElementById('canvas'),
+            context = canvas.getContext('2d'),
+            pause = true,
+            discs = [
+                {
+                    x: 150,
+                    y: 250,
+                    lastX: 150,
+                    lastY: 250,
+                    velocityX: -3.2,
+                    velocityY: 3.5,
+                    radius: 25,
+                    innerColor: 'rgba(255, 255, 0, 1)',
+                    middleColor: 'rgba(255, 255, 0, 0.7)',
+                    outerColor: 'rgba(255, 255, 0, 0.5)',
+                    strokeStyle: 'gray'
+                },
+
+                {
+                    x: 50,
+                    y: 150,
+                    lastX: 50,
+                    lastY: 150,
+                    velocityX: 2.2,
+                    velocityY: 2.5,
+                    radius: 25,
+                    innerColor: 'rgba(100,145,230,1.0)',
+                    middleColor: 'rgba(100,145,230,0.7)',
+                    outerColor: 'rgba(100,145,230,0.5)',
+                    strokeStyle: 'blue'
+                },
+
+                {
+                    x: 150,
+                    y: 75,
+                    lastX: 150,
+                    lastY: 75,
+                    velocityX: 1.2,
+                    velocityY: 1.5,
+                    radius: 25,
+                    innerColor: 'rgba(255,0,0,1.0)',
+                    middleColor: 'rgba(255,0,0,0.7)',
+                    outerColor: 'rgba(255,0,0,0.5)',
+                    strokeStyle: 'orange'
+                }
+            ],
+            numDiscs = discs.length,
+            animateBtn = document.getElementById('animateBtn'),
+            lastTime = 0,
+            frameCount = 0;
+
+    context.font = '48px Helvetica';
+
+    animateBtn.onclick = function(e) {
+        pause = pause ? false : true;
+        if (pause) {
+            animateBtn.value = 'Animate';
+        }
+        else {
+            window.requestNextAnimationFrame(animate);
+            animateBtn.value = 'Pause';
+        }
+    }
+
+    drawBackground();
+
+    function eraseBackground() {
+        context.clearRect(0, 0, canvas.width, canvas.height);
+    }
+
+    function update() {
+        var disc = null;
+
+        for (var i = 0; i < numDiscs; ++i) {
+            disc = discs[i];
+
+            if (disc.x + disc.velocityX + disc.radius > context.canvas.width ||
+                    disc.x + disc.velocityX - disc.radius < 0) {
+                disc.velocityX = -disc.velocityX;
+            }
+
+            if (disc.y + disc.velocityY + disc.radius > context.canvas.height ||
+                    disc.y + disc.velocityY - disc.radius < 0) {
+                disc.velocityY = -disc.velocityY;
+            }
+
+            disc.x += disc.velocityX;
+            disc.y += disc.velocityY;
+        }
+     }
+
+    function draw() {
+        var disc = null;
+
+        for (var i = 0; i < numDiscs; ++ i) {
+            disc = discs[i];
+            var gradient = context.createRadialGradient(
+                    disc.x, disc.y, 0, disc.x, disc.y, disc.radius);
+            gradient.addColorStop(0.3, disc.innerColor);
+            gradient.addColorStop(0.5, disc.middleColor);
+            gradient.addColorStop(1.0, disc.outerColor);
+
+            context.save();
+            context.beginPath();
+            context.arc(disc.x, disc.y, disc.radius, 0, Math.PI*2, false);
+            context.fillStyle = gradient;
+            context.strokeStyle = disc.strokeStyle;
+            context.fill();
+            context.stroke();
+            context.restore();
+        }
+    }
+
+//    function drawDisc(disc) {
+//        var gradient = context.createRadialGradient(disc.x, disc.y, 0, disc.x, disc.y, disc.radius);
+//
+//        gradient.addColorStop(0.3, disc.innerColor);
+//        gradient.addColorStop(0.7, disc.middleColor);
+//        gradient.addColorStop(1.0, disc.outerColor);
+//
+//        context.save();
+//        context.beginPath();
+//        context.arc(disc.x, disc.y, disc.radius, 0, Math.PI*2, false);
+//        context.clip();
+//
+//        context.fillStyle = gradient;
+//        context.strokeStyle = disc.strokeStyle;
+//        context.lineWidth = 2;
+//        context.fill();
+//        context.stroke();
+//
+//        context.restore();
+//    }
+//
+//    function draw() {
+//        var i, disc;
+//
+//        i = numDiscs;
+//        while(i--) {
+//            disc = discs[i];
+//            drawDisc(disc);
+//            disc.lastX = disc.x;
+//            disc.layerX = disc.y;
+//        }
+//
+//        if (frameCount === 0) {
+//            console.profile('corehtml5 animation, basic');
+//        }
+//        else if (frameCount === 100) {
+//            context.profileEnd();
+//            frameCount = -1;
+//        }
+//
+//        if (frameCount !== -1 && frameCount < 100) {
+//            frameCount++;
+//        }
+//    }
+
+    function calculateFps() {
+        var now = (+new Date),
+                fps = 1000 / (now - lastTime);
+        lastTime = now;
+
+        return fps;
+    }
+
+    function drawBackground() {
+        var STEP_Y = 12,
+                i = context.canvas.height;
+
+        context.strokeStyle = 'lightgray';
+        context.lineWidth = 0.5;
+
+        while(i > STEP_Y*4) {
+            context.beginPath();
+            context.moveTo(0, i);
+            context.lineTo(context.canvas.width, i);
+            context.stroke();
+            i -= STEP_Y;
+        }
+
+        context.save();
+
+        context.strokeStyle = 'rgba(100, 0, 0, 0.3)';
+        context.lineWidth = 1.0;
+
+        context.beginPath();
+
+        context.moveTo(35, 0);
+        context.lineTo(35, context.canvas.height);
+        context.stroke();
+
+        context.restore();
+    }
+
+    function animate(time) {
+        if (!pause) {
+            context.clearRect(0, 0, canvas.width, canvas.height);
+            drawBackground();
+            update();
+            draw();
+
+            context.fillStyle = 'cornflowerblue';
+            context.fillText(calculateFps().toFixed() + 'fps', 45, 50);
+            window.requestNextAnimationFrame(animate);
+        }
+    }
+</script>
+</body>
+</html>

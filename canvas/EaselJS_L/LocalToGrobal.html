@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title></title>
+    <script src="../EaselJS-master/lib/easeljs-NEXT.combined.js"></script>
+    <script>
+        var canvas, stage, whee, bar1, bar2, bar3, arm1, arm2;
+
+        function init() {
+            canvas = document.getElementById('testCanvas');
+            whee = document.getElementById('whee');
+
+            stage = new createjs.Stage(canvas);
+
+            bar3 = new createjs.Shape();
+            bar3.graphics.f('#8b2222').dr(-3, -3, 6, 130);
+            bar3.regY = 20;
+            bar3.y = 105;
+
+
+            bar2 = new createjs.Shape();
+            bar2.graphics.f('#228b22').dr(-5, -5, 10, 110);
+
+            arm2 = new createjs.Container();
+            arm2.addChild(bar2, bar3);
+            arm2.regY = 20;
+            arm2.y = 72;
+
+            bar1 = new createjs.Shape();
+            bar1.graphics.f('#22228b').dr(-8, -8, 16, 80);
+
+            arm1 = new createjs.Container();
+            arm1.addChild(bar1, arm2);
+
+            arm1.x = canvas.width / 2;
+            arm1.y = canvas.height / 2;
+
+            stage.addChild(arm1);
+
+            createjs.Ticker.interval = 20;
+            createjs.Ticker.addEventListener('tick', tick);
+        }
+
+        function tick(event) {
+            arm1.rotation += 1.9;
+            arm2.rotation += -2.7;
+            bar3.rotation += 4.4;
+
+            var pt = bar3.localToGlobal(0, 130);
+
+            whee.style.left = Math.round(pt.x + canvas.offsetLeft - 10) + 'px';
+            whee.style.top  = Math.round(pt.y + canvas.offsetTop - 10) + 'px';
+
+            stage.update(event);
+        }
+    </script>
+</head>
+<body onload="init()">
+<div >
+    <canvas id="testCanvas" width="960" height="400"></canvas>
+    <input type="button" value="=.=.=.=" id="whee" style="position:absolute" />
+</div>
+</body>
+</html>

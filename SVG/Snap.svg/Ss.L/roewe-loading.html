@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title></title>
+    <style>
+        #svg{
+            background: #000000;
+        }
+    </style>
+    <script src="../Snap.svg-0.3.0/dist/snap.svg-min.js"></script>
+</head>
+<body>
+<svg id="svg" width="960" height="400" version="1.1" xmlns="http://www.w3.org/2000/svg">
+   <g id="g1">
+       <circle id="c1" cx="120"  cy="145"  r="2" fill="white"></circle>
+       <circle id="c2" cx="190"  cy="130"  r="4" fill="white"></circle>
+       <circle id="c3" cx="140"  cy="220" r="3" fill="white"></circle>
+       <circle id="c4" cx="230" cy="160"  r="2" fill="white"></circle>
+       <circle id="c5" cx="280" cy="210" r="2" fill="white"></circle>
+       <circle id="c6" cx="190"  cy="105"   r="3" fill="white"></circle>
+       <circle id="c7" cx="150"  cy="200" r="4" fill="white"></circle>
+       <circle id="c8" cx="300" cy="120"  r="2" fill="white"></circle>
+       <circle id="c9" cx="280" cy="210" r="2" fill="white"></circle>
+       <circle id="c10" cx="190"  cy="105"   r="3" fill="white"></circle>
+       <circle id="c11" cx="150"  cy="200" r="4" fill="white"></circle>
+       <circle id="c12" cx="300" cy="120"  r="2" fill="white"></circle>
+   </g>
+</svg>
+<script>
+    window.requestAnimFrame = (function(callback){
+        return window.requestAnimationFrame ||
+                window.webkitRequestAnimationFrame ||
+                window.mozRequestAnimationFrame ||
+                window.oRequestAnimationFrame ||
+                window.msRequestAnimationFrame ||
+                function(callback){
+                    window.setTimeout(callback, 1000/60);
+                };
+    })();
+</script>
+
+<script>
+    var svg = Snap('#svg');
+//    var csys = [145, 130, 220, 160, 210, 105, 200, 120];
+    var csp = [
+        {x:120, y:145},
+        {x:190, y:130},
+        {x:140, y:220},
+        {x:230, y:160},
+        {x:280, y:210},
+        {x:190, y:105},
+        {x:150, y:200},
+        {x:300, y:120},
+        {x:280, y:210},
+        {x:190, y:105},
+        {x:150, y:200},
+        {x:300, y:120}
+    ];
+    var count = 0;
+    var cs = svg.selectAll('circle');
+    var g = svg.select('#g1');
+
+    function ani() {
+        count ++;
+
+        if (svg.select('#path')) {
+            svg.select('#path').remove();
+        }
+        var pathString = '';
+        cs.forEach(function(el, index) {
+            var _v = Math.cos(Math.PI/360 * count* (index+1));
+            var _py = (csp[index].y - 225) * _v + 225;
+
+            el.attr({
+                cy:_py
+            });
+
+            if (index == 0) {
+                pathString += 'M'+csp[index].x+' '+_py;
+            } else if (index == 11) {
+                pathString += 'L'+csp[index].x+' '+_py+'Z';
+            } else {
+                pathString += 'L'+csp[index].x+' '+_py;
+            }
+
+        });
+
+        var path = svg.paper.path(pathString).attr({
+            stroke:'#fff',
+            strokeWidth:1,
+            id:'path'
+        });
+
+        g.append(path);
+
+//        g.transform(new Snap.Matrix().rotate(count/2, 170, 225));
+
+        requestAnimFrame(ani);
+    }
+
+    requestAnimFrame(ani);
+
+</script>
+</body>
+</html>

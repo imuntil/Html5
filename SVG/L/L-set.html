@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title></title>
+</head>
+<body>
+<svg width="320" height="320" xmlns="http://www.w3.org/2000/svg">
+    <g>
+        <text font-family="microsoft yahei" font-size="120" y="160" x="160">马</text>
+        <animateTransform attributeName="transform" begin="0s" dur="10s" type="rotate" from="0 160 160"
+                          to="360 160 160" repeatCount="indefinite" ></animateTransform>
+    </g>
+</svg>
+
+<svg width="320" height="320" xmlns="http://www.w3.org/2000/svg">
+    <g>
+        <text font-family="microsoft yahei" font-size="120" x="160" y="160">马
+            <set attributeName="x" attributeType="XML" to="60" begin="3s"></set>
+        </text>
+    </g>
+</svg>
+
+<svg width="320" height="320" xmlns="http://www.w3.org/2000/svg">
+    <g>
+        <text font-family="microsoft yahei" font-size="120" y="160" x="160">
+            马
+            <animate attributeName="x" from="160" to="60" begin="0s" dur="3s" repeatCount="indefinite"></animate>
+        </text>
+    </g>
+</svg>
+
+<svg width="320" height="320" xmlns="http://www.w3.org/2000/svg">
+    <g>
+        <text font-family="microsoft yahei" font-size="120" y="100" x="100">
+            马
+        </text>
+        <animateTransform attributeName="transform" begin="0s" dur="3s" type="scale" from="1" to="1.5"
+                          repeatCount="indefinite"></animateTransform>
+    </g>
+</svg>
+
+<svg width="320" height="200" xmlns="http://www.w3.org/2000/svg">
+    <text font-family="microsoft yahei" font-size="40" x="0" y="0" fill="#cd0000">马
+        <animateMotion path="M100,150a60,50,0,0,0,0,-100a60,50,0,0,0,0,100"
+                begin="0s" dur="3s" repeatCount="indefinite" rotate="auto"></animateMotion>
+    </text>
+    <path d="M100,150a60,50,0,0,0,0,-100a60,50,0,0,0,0,100" stroke="#cd0000" stroke-wdith="2" fill="none"></path>
+</svg>
+
+<svg width="320" height="200" xmlns="http://www.w3.org/2000/svg">
+    <text font-family="microsoft yahei" font-size="120" y="160" x="160">马
+        <animate attributeName="x" from="160" to="60" begin="0s" dur="3s" repeatCount="indefinite"></animate>
+        <animate attributeName="opacity" from="1" to="0" befin="0s" dur="3s" repeatCount="indefinite"></animate>
+    </text>
+</svg>
+
+<svg width="320" height="200" xmlns="http://www.w3.org/2000/svg">
+    <text font-family="microsoft yahei" font-size="120" y="150" x="160">
+        马
+        <animate attributeName="x" values="160;40;160" dur="3s" repeatCount="indefinite"></animate>
+    </text>
+</svg>
+
+<svg width="320" height="200" xmlns="http://www.w3.org/2000/svg">
+    <text font-family="microsoft yahei" font-size="120" y="160" x="160">马
+        <animate id="x" attributeName="x" to="60" begin="0s" dur="3s" fill="freeze"></animate>
+        <animate attributeName="y" to="100" begin="x.end" dur="3s" fill="freeze"></animate>
+    </text>
+</svg>
+
+<svg width="320" height="200" xmlns="http://www.w3.org/2000/svg">
+    <circle id="circle" cx="100" cy="100" r="50"></circle>
+    <text font-family="microsoft yahei" font-size="120" y="160" x="160">马
+        <animate attributeName="x" to="60" begin="circle.click+2s" dur="1s" fill="freeze"></animate>
+    </text>
+</svg>
+
+<svg width="320" height="200" xmlns="http://www.w3.org/2000/svg">
+    <text font-family="microsoft yahei" font-size="120" x="160" y="160">马
+        <animate id="x" attributeName="x" to="60" begin="0s" dur="2s" repeatCount="2"></animate>
+        <animate attributeName="y" to="100" begin="x.repeat(2)" dur="2s" fill="freeze"></animate>
+    </text>
+</svg>
+
+<svg width="320" height="200" font-family="microsoft yahei" xmlns="http://www.w3.org/2000/svg"
+     xmlns:xlink="http://wwww.w3.org/1999/xlink">
+    <text font-size="120" y="160" x="160">马
+        <animate id="animates" attributeName="x" to="60" begin="indefinite" dur="2s" repeatCount="1"></animate>
+    </text>
+    <a xlink:href="#animates">
+        <text x="10" y="20" fill="#cd0000" font-size="30">点击我</text>
+    </a>
+</svg>
+
+
+
+<svg width="650" height="320" xmlns="http://www.w3.org/2000/svg">
+    <g>
+        <text font-family="microsoft yahei" font-size="60" y="100" x="100">
+            马
+        </text>
+        <animateTransform attributeName="transform" type="scale" from="1" to="2" dur="10s"
+                          repeatCount="indefinite" additive="sum"></animateTransform>
+        <animateTransform attributeName="transform" type="rotate" from="0 200 200" to="360 100 100"
+                          dur="10s" fill="freeze" repeatCount="indefinite" additive="sum"></animateTransform>
+    </g>
+    <g>
+        <text font-size="10" x="10" y="200">
+            <tspan x="10" y="200">
+                accumulate是累积的意思。支持参数有：none | sum. 默认值是none. 如果值是sum表示动画结束时候的位置作为下次动画的起始位置。
+
+            </tspan>
+            <tspan x="10" y="220">
+                additive控制动画是否附加。支持参数有：replace | sum. 默认值是replace. 如果值是sum表示动画的基础知识会附加到其他低优先级的动画上，
+
+            </tspan>
+        </text>
+    </g>
+</svg>
+
+</body>
+</html>

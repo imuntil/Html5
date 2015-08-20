@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title></title>
+    <script src="../EaselJS-master/lib/easeljs-NEXT.combined.js"></script>
+    <script>
+        var stage, isDrawing, drawingCanvas, oldPt, oldMidPt;
+        var image, bitmap, maskFilter, cursor, text, blur;
+
+        function init() {
+            image = new Image();
+            image.onload = handleComplete;
+            image.src = '../EaselJS-master/_assets/art/flowers.jpg';
+            stage = new createjs.Stage('testCanvas');
+        }
+
+        function handleComplete() {
+            createjs.Touch.enable(stage);
+            stage.enableMouseOver();
+
+            stage.addEventListener('stagemousedown', handleMouseDown);
+            stage.addEventListener('stagemouseup', handleMouseUp);
+            stage.addEventListener('stagemousemove', handleMouseMove);
+
+            drawingCanvas = new createjs.Shape();
+            bitmap = new createjs.Bitmap(image);
+
+            blur = new createjs.Bitmap(image);
+            blur.filters = [new createjs.BlurFilter(24, 24, 2),
+                new createjs.ColorMatrixFilter(new createjs.ColorMatrix(60))];
+            blur.cache(0, 0, 960, 400);
+
+            text = new createjs.Text('Click and Drag to Reveal tht image', '20px Arial', '#FFF');
+            text.set({x:stage.canvas.width/2, y:stage.canvas.height-40});
+            text.textAlign = 'center';
+
+            stage.addChild(blur, text, bitmap);
+            updateCacheImage(false);
+
+            cursor = new createjs.Shape(new createjs.Graphics().f('#fff').dc(0, 0, 25));
+            cursor.cursor = 'pointer';
+
+            stage.addChild(cursor);
+        }
+
+        function handleMouseDown(event) {
+            oldPt = new createjs.Point(stage.mouseX, stage.mouseY);
+
+            oldMidPt = oldPt;
+            isDrawing = true;
+        }
+
+        function handleMouseUp(event) {
+            updateCacheImage(true);
+            isDrawing = false;
+        }
+
+        function handleMouseMove(event) {
+            cursor.x = stage.mouseX;
+            cursor.y = stage.mouseY;
+
+            if (!isDrawing) {
+                stage.update();
+                return;
+            }
+
+            var midPoint = new createjs.Point(oldPt.x + stage.mouseX >> 1, oldPt.y + stage.mouseY >> 1);
+            drawingCanvas.graphics.ss(40, 'round', 'round')
+                    .s('rgba(0, 0, 0, 0.5)')
+                    .mt(midPoint.x, midPoint.y)
+                    .qt(oldPt.x, oldPt.y, oldMidPt.x, oldMidPt.y);
+
+            oldPt.x = stage.mouseX;
+            oldPt.y = stage.mouseY;
+
+            oldMidPt.x = midPoint.x;
+            oldMidPt.y = midPoint.y;
+
+            updateCacheImage(true);
+        }
+
+        function updateCacheImage(update) {
+
+            if (update) {
+                drawingCanvas.updateCache();
+            } else {
+                drawingCanvas.cache(0, 0, image.width, image.height);
+            }
+
+            maskFilter = new createjs.AlphaMaskFilter(drawingCanvas.cacheCanvas);
+            bitmap.filters = [maskFilter];
+            if (update) {
+                bitmap.updateCache(0, 0, image.width, image.height);
+            } else {
+                bitmap.cache(0, 0, image.width, image.height);
+            }
+
+            stage.update();
+        }
+    </script>
+</head>
+<body onload="init()">
+
+<div>
+    <canvas id="testCanvas" width="960" height="400"></canvas>
+</div>
+
+</body>
+</html>

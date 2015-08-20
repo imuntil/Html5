@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title></title>
+</head>
+<body>
+<canvas id="canvas" height="360" width="620"></canvas>
+<a id="sun">sun</a>
+<script>
+    var tt = {}
+    tt.image = new Image();
+    tt.canvas = document.getElementById('canvas');
+    tt.cxt = tt.canvas.getContext('2d');
+
+    tt.offsetCanvas = document.createElement('canvas');
+    tt.ocxt = tt.offsetCanvas.getContext('2d');
+
+    tt.sunbtn = document.getElementById('sun');
+    tt.sunon = false;
+    tt.sunglassFilter = new Worker('../plug/sunglassFilter.js');
+
+    tt.LEN_RADIUS = tt.canvas.width/5;
+
+    tt.drawLenses = function(l, r) {
+        tt.cxt.save();
+        tt.cxt.beginPath();
+
+        tt.cxt.arc(l.x, l.y, tt.LEN_RADIUS, 0, Math.PI*2, false);
+        tt.cxt.stroke();
+
+        moveTo(r.x, r.y);
+
+        tt.cxt.arc(r.x, r.y, tt.LEN_RADIUS, 0, Math.PI*2, false);
+        tt.cxt.stroke();
+
+        tt.cxt.clip();
+
+        tt.cxt.drawImage(tt.offsetCanvas, 0, 0, tt.canvas.width, tt.canvas.height);
+        tt.cxt.restore();
+    };
+
+    tt.drawWire = function(c) {
+        tt.cxt.beginPath();
+        tt.cxt.moveTo(c.x-tt.LEN_RADIUS/4, c.y-tt.LEN_RADIUS/2);
+        tt.cxt.quadraticCurveTo(c.x, c.y-tt.LEN_RADIUS+20, c.x+tt.LEN_RADIUS/4, c.y-tt.LEN_RADIUS/2);
+        tt.cxt.stroke();
+    };
+
+    tt.drawConnectors = function(center) {
+        tt.cxt.beginPath();
+
+        tt.cxt.fillStyle = 'silver';
+        tt.cxt.strokeStyle = 'rgba(0, 0, 0, 0.4)';
+        tt.cxt.lineWidth = 2;
+
+        tt.cxt.arc(center.x - tt.LEN_RADIUS/4, center.y - tt.LEN_RADIUS/2, 4, 0, Math.PI*2, false);
+        tt.cxt.fill();
+        tt.cxt.stroke();
+
+        tt.cxt.beginPath();
+        tt.cxt.arc(center.x + tt.LEN_RADIUS/4, center.y - tt.LEN_RADIUS/2, 4, 0, Math.PI*2, false);
+        tt.cxt.fill();
+        tt.cxt.stroke();
+    };
+
+    tt.putSunglassesOn = function() {
+        var imgdata,
+            center = {
+                x: tt.canvas.width/2,
+                y: tt.canvas.height/2
+            },
+            leftLensLocation = {
+                x: center.x - tt.LEN_RADIUS - 10,
+                y: center.y
+            },
+            rightLensLocation = {
+                x: center.x + tt.LEN_RADIUS + 10,
+                y: center.y
+            };
+
+        imgdata = tt.cxt.getImageData(0, 0, tt.canvas.width, tt.canvas.height);
+
+        tt.sunglassFilter.postMessage(imgdata);
+
+        tt.sunglassFilter.onmessage = function(event) {
+            tt.ocxt.putImageData(event.data, 0, 0);
+            tt.drawLenses(leftLensLocation, rightLensLocation);
+            tt.drawWire(center);
+            tt.drawConnectors(center);
+        };
+    };
+
+    tt.drawOriginalImage = function() {
+        tt.cxt.drawImage(tt.image, 0, 0, tt.image.width, tt.image.height, 0, 0, tt.canvas.width, tt.canvas.height);
+    };
+
+
+    tt.sunbtn.onclick = function() {
+        if (tt.sunon) {
+            tt.sunbtn.value = 'Sunglasses';
+            tt.drawOriginalImage();
+            tt.sunon = false;
+        } else {
+            tt.sunbtn.value = 'Original Picture';
+            tt.putSunglassesOn();
+            tt.sunon = true;
+        }
+    };
+
+    tt.offsetCanvas.width = tt.canvas.width;
+    tt.offsetCanvas.height = tt.canvas.height;
+
+    tt.image.src = '../../pic/t.png';
+    tt.image.onload = function() {
+        tt.drawOriginalImage();
+    };
+</script>
+</body>
+</html>

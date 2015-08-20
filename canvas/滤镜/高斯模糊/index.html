@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title></title>
+    <script src="http://code.jquery.com/jquery-1.10.2.min.js" type="text/javascript"></script>
+    <!--<script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js" type="text/javascript"></script>-->
+    <script src="StackBlur.js"></script>
+    <script>
+        /**
+         * convolution - keneral size 5*5 - blur effect filter(模糊效果)
+         */
+        $(function() {
+            function blur(context) {
+//            console.log("Canvas Filter - blur process");
+                var tempCanvasData = copyImageData(context);
+                var canvasData = tempCanvasData;
+                var sumred = 0.0, sumgreen = 0.0, sumblue = 0.0;
+                for ( var x = 0; x < tempCanvasData.width; x++) {
+                    for ( var y = 0; y < tempCanvasData.height; y++) {
+
+                        // Index of the pixel in the array
+                        var idx = (x + y * tempCanvasData.width) * 4;
+                        for(var subCol=-2; subCol<=2; subCol++) {
+                            var colOff = subCol + x;
+                            if(colOff <0 || colOff >= tempCanvasData.width) {
+                                colOff = 0;
+                            }
+                            for(var subRow=-2; subRow<=2; subRow++) {
+                                var rowOff = subRow + y;
+                                if(rowOff < 0 || rowOff >= tempCanvasData.height) {
+                                    rowOff = 0;
+                                }
+                                var idx2 = (colOff + rowOff * tempCanvasData.width) * 4;
+                                var r = tempCanvasData.data[idx2 + 0];
+                                var g = tempCanvasData.data[idx2 + 1];
+                                var b = tempCanvasData.data[idx2 + 2];
+                                sumred += r;
+                                sumgreen += g;
+                                sumblue += b;
+                            }
+                        }
+
+                        // calculate new RGB value
+                        var nr = (sumred / 25.0);
+                        var ng = (sumgreen / 25.0);
+                        var nb = (sumblue / 25.0);
+
+                        // clear previous for next pixel point
+                        sumred = 0.0;
+                        sumgreen = 0.0;
+                        sumblue = 0.0;
+
+                        // assign new pixel value
+                        canvasData.data[idx + 0] = nr; // Red channel
+                        canvasData.data[idx + 1] = ng; // Green channel
+                        canvasData.data[idx + 2] = nb; // Blue channel
+                        canvasData.data[idx + 3] = 255; // Alpha channel
+                    }
+                }
+                return canvasData;
+            }
+
+            function copyImageData(context) {
+                var canvasData = context.getImageData(0, 0, context.canvas.width, context.canvas.height);
+                return canvasData;
+            }
+
+//            var canvas = document.getElementById('canvas'),
+//                    cxt = canvas.getContext('2d'),
+//                    canvastemp = document.getElementById('canvastemp'),
+//                    cxtemp = canvastemp.getContext('2d'),
+//                    img = new Image();
+//            img.src = '../../abcd.jpg';
+//            img.onload = function() {
+//                cxt.drawImage(img, 0, 0);
+//                var canvasData = blur(cxt);
+//                cxtemp.putImageData(canvasData, 0, 0);
+//            }
+
+            stackBlurImage('img', 'canvas', 30, true);
+
+        });
+
+
+    </script>
+</head>
+<body>
+<img src="sos.png" id="img" />
+<canvas id="canvas" width="500" height="400"></canvas>
+<canvas id="canvastemp" width="500" height="400"></canvas>
+</body>
+</html>

@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title></title>
+    <script src="../EaselJS-master/lib/easeljs-NEXT.combined.js"></script>
+    <script>
+        var canvas, stage, barPadding = 7, barHeight, maxValue = 50, count;
+        var barValues = [];
+        var bars = [];
+
+        function init() {
+            canvas = document.getElementById('testCanvas');
+            stage = new createjs.Stage(canvas);
+
+            var numBars = Math.random() * 6 + 4 | 0;
+            var max = 0;
+            for (var  i = 0; i < numBars; i++) {
+                var val = Math.random() * maxValue + 1 | 0;
+                if (val > max) {
+                    max = val;
+                }
+
+                barValues.push(val);
+            }
+
+            var barWidth = (canvas.width - 150 - (numBars - 1) * barPadding) / numBars;
+            barHeight = canvas.height - 150;
+
+            var bg = new createjs.Shape();
+            stage.addChild(bg);
+
+            bg.graphics.beginStroke('#444850')
+                    .moveTo(40, canvas.height - 69.5)
+                    .lineTo(canvas.width - 70, canvas.height - 69.5)
+                    .endStroke()
+                    .beginFill('#22252B')
+                    .moveTo(canvas.width - 70, canvas.height - 70)
+                    .lineTo(canvas.width - 60, canvas.height - 80)
+                    .lineTo(50, canvas.height - 80)
+                    .lineTo(40, canvas.height - 70)
+                    .closePath();
+
+
+            for (i = 0; i < 9; i++) {
+                bg.graphics.beginStroke(i % 2 ? '#333840' : '#444850')
+                        .moveTo(50, (canvas.height - 80 - i / 8 * barHeight | 0) + 0.5)
+                        .lineTo(canvas.width - 60, (canvas.height - 80 - i / 8 * barHeight | 0) + 0.5);
+            }
+
+            var label = new createjs.Text('Quarterly Whatsits', 'bold 24px Arial', '#fff');
+            label.textAlign = 'center';
+            label.x = canvas.width / 2;
+            label.y = 20;
+            stage.addChild(label);
+
+            for (i = 0; i < numBars; i++) {
+                var bar = new createjs.Container();
+
+                var hue = bar.hue = i / numBars * 360;
+
+                var front = new createjs.Shape();
+                front.graphics.beginLinearGradientFill(
+                        [createjs.Graphics.getHSL(hue, 100, 60, 0.9),
+                        createjs.Graphics.getHSL(hue, 100, 20, 0.75)],
+                        [0, 1],
+                        0, -100, barWidth, 0
+                ).drawRect(0, -100, barWidth + 1, 100);
+
+
+                var top = new createjs.Shape();
+                top.graphics.beginFill(createjs.Graphics.getHSL(hue, 100, 70, 0.9))
+                        .moveTo(10, -10)
+                        .lineTo(10 + barWidth, -10)
+                        .lineTo(barWidth, 0)
+                        .lineTo(0, 0)
+                        .closePath();
+
+                if (barValues[i] == max) {
+                    top.graphics.beginFill('rgba(0, 0, 0, 0.75)')
+                            .drawPolyStar(barWidth / 2, 31, 7, 5, 0.6, -90)
+                            .closePath();
+                }
+
+                var right = new createjs.Shape();
+                right.x = barWidth - 0.5;
+
+                var title = new createjs.Text('Q' + i, 'bold 16px Arial', '#fff');
+                title.textAlign = 'center';
+                title.x = barWidth / 2;
+                title.maxWidth = barWidth;
+                title.y = 12;
+                title.alpha = 0.75;
+
+                var tab = new createjs.Shape();
+                tab.graphics.beginFill(createjs.Graphics.getHSL(hue, 100, 20))
+                        .drawRoundRectComplex(0, 1, barWidth, 38, 0, 0, 10, 10);
+
+                var value = new createjs.Text('foo', 'bold 14px Arial', '#000');
+                value.textAlign = 'center';
+                value.x = barWidth / 2;
+                value.alpha = 0.75;
+
+                bar.addChild(right, front, top, value, tab, title);
+
+                bar.x = i * (barWidth + barPadding) + 60;
+                bar.y = canvas.height - 70;
+
+                stage.addChild(bar);
+                bars.push(bar);
+
+                drawBar(bar, 0);
+            }
+
+            count = numBars * 10;
+            createjs.Ticker.timingMode = createjs.Ticker.RAF;
+            createjs.Ticker.addEventListener('tick', tick);
+        }
+
+        function drawBar(bar, value) {
+
+            var h = value / maxValue * barHeight;
+
+            var val = bar.getChildAt(3);
+            val.text = value | 0;
+            val.visible = (h > 28);
+            val.y = -h + 10;
+
+            bar.getChildAt(1).scaleY = h / 100;
+            bar.getChildAt(2).y = -h + 0.5;
+
+            var right = bar.getChildAt(0);
+            right.graphics.clear().
+                    beginFill(createjs.Graphics.getHSL(bar.hue, 60, 15, 0.7))
+                    .moveTo(0, 0)
+                    .lineTo(0, -h)
+                    .lineTo(10, -h - 10)
+                    .lineTo(10, -10)
+                    .closePath();
+
+        }
+
+        function tick(event) {
+            if (--count == 1) {
+                createjs.Ticker.removeEventListener('tick', tick);
+            }
+
+            var c = bars.length * 10 - count;
+            var index = c / 10 | 0;
+            var bar = bars[index];
+            drawBar(bar, (c % 10 + 1) / 10 * barValues[index]);
+
+            stage.update(event);
+        }
+    </script>
+</head>
+<body onload="init()">
+
+<div>
+    <canvas id="testCanvas" width="960" height="400" style="background: #111926"></canvas>
+</div>
+
+</body>
+</html>

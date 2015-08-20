@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title></title>
+    <style>
+        span {
+            width: 64px;
+            height: 64px;
+            display: inline-block;
+            margin: 40px 30px;
+            cursor: pointer;
+            background-repeat: no-repeat;
+            background-position: center center;
+        }
+
+
+    </style>
+</head>
+<body style="background-color: deepskyblue; color: #ffffff">
+<span class="si-icon si-icon-maximize-rotate" data-icon-name="maximizeRotate"></span>
+<script src="../Snap.svg/Snap.svg-0.3.0/dist/snap.svg-min.js"></script>
+<script src="../AnimatedSVGIcons/js/svgicons.js"></script>
+<script>
+
+    var _config1 = {
+        maximizeRotate : {
+            url : 'maximize.svg',
+            animation : [
+                {
+                    el : 'path:nth-child(1)',
+                    animProperties : {
+                        from : { val : '{"transform" : "r0 16 16 t0 0"}' },
+                        to : { val : '{"transform" : "r180 16 16 t-5 -5"}' }
+                    }
+                },
+                {
+                    el : 'path:nth-child(2)',
+                    animProperties : {
+                        from : { val : '{"transform" : "r0 48 16 t0 0"}' },
+                        to : { val : '{"transform" : "r-180 48 16 t5 -5"}' }
+                    }
+                },
+                {
+                    el : 'path:nth-child(3)',
+                    animProperties : {
+                        from : { val : '{"transform" : "r0 16 48 t0 0"}' },
+                        to : { val : '{"transform" : "r-180 16 48 t-5 5"}' }
+                    }
+                },
+                {
+                    el : 'path:nth-child(4)',
+                    animProperties : {
+                        from : { val : '{"transform" : "r0 48 48 t0 0"}' },
+                        to : { val : '{"transform" : "r180 48 48 t5 5"}' }
+                    }
+                }
+            ]
+        }
+    };
+
+    var svgicon1 = new svgIcon(document.querySelector('.si-icon-maximize-rotate'),
+            _config1,
+            {
+                easing: mina.elastic,
+                speed:600
+            }
+    );
+</script>
+</body>
+</html>

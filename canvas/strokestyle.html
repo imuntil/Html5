@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title></title>
+    <script type="text/javascript">
+        function draw() {
+            var ctx = document.getElementById('canvas').getContext('2d');
+            for (i = 0; i < 60; i ++) {
+                for (j = 0; j < 60; j++) {
+                    ctx.strokeStyle = 'rgb(0,' + Math.floor(4*i) + ',' + Math.floor(4*j) +')';
+                    ctx.beginPath();
+                    ctx.arc(12.5 + j*25,12.5+i*25,10,0,Math.PI*2,true);
+                    ctx.stroke();
+                }
+            }
+        }
+    </script>
+    <style type="text/css">
+        body { margin: 20px; font-family: arial,verdana,helvetica; background: #fff;}
+        h1 { font-size: 140%; font-weight:normal; color: #036; border-bottom: 1px solid #ccc; }
+        canvas { float: left; margin-right: 20px; margin-bottom: 20px; }
+    </style>
+</head>
+<body onload="draw();">
+<div>
+    <canvas id="canvas" width="1500" height="1500"></canvas>
+</div>
+</body>
+</html>

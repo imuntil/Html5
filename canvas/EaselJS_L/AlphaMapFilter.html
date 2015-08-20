@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title></title>
+    <script src="../EaselJS-master/lib/easeljs-NEXT.combined.js"></script>
+    <script>
+        var canvas, stage;
+        function init() {
+            canvas = document.getElementById('testCanvas');
+            stage = new createjs.Stage(canvas);
+
+
+            var bmp = new Image();
+            bmp.onload = imageLoadHandle;
+            bmp.src = '../EaselJS-master/_assets/art/flowers.jpg';
+        }
+
+        function imageLoadHandle(e) {
+
+//            var box = new createjs.Shape();
+//            box.graphics.beginLinearGradientFill(['#ff0000', '#0000ff'], [0, 1], 0, 0, 0, canvas.height)
+//                    .drawRect(0, 0, canvas.width, canvas.height);
+//            box.cache(0, 0, canvas.width, canvas.height);
+//
+//            var img = new createjs.Bitmap(e.target);
+//            img.filters = [
+//                new createjs.AlphaMapFilter(box.cacheCanvas)
+//            ];
+//
+//            img.cache(0, 0, canvas.width, canvas.height);
+//            stage.addChild(img);
+
+
+            var box = new createjs.Shape();
+            box.graphics.beginLinearGradientFill(['rgba(0, 0, 0, 0)', 'rgba(0, 0, 0, 0.4)'], [0, 1], 0, 0, 0, canvas.height)
+                    .drawRect(0, 0, canvas.width, canvas.height);
+            box.cache(0, 0, canvas.width, canvas.height);
+
+            var img = new createjs.Bitmap(e.target);
+            img.filters = [
+                new createjs.AlphaMaskFilter(box.cacheCanvas)
+            ];
+
+            img.cache(0, 0, canvas.width, canvas.height);
+            stage.addChild(img);
+
+
+
+            stage.update();
+        }
+    </script>
+</head>
+<body onload="init()">
+
+<div>
+    <canvas id="testCanvas" width="960" height="400"></canvas>
+</div>
+
+</body>
+</html>

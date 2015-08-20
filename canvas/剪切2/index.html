@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title></title>
+    <!--<script src="http://code.jquery.com/jquery-1.10.2.min.js" type="text/javascript"></script>-->
+    <!--<script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js" type="text/javascript"></script>-->
+    <style>
+        #canvas{
+            position: absolute;
+            top: 20px;
+            left: 20px;
+        }
+        #div {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: #000000;
+            opacity: 0.4;
+        }
+        #div img{
+            position: absolute;
+            top: 0px;
+            left: 10px;
+            opacity: 0.6;
+        }
+        #img{
+            position: absolute;
+            right: 20px;
+        }
+    </style>
+</head>
+<body>
+<canvas id="canvas"></canvas>
+<div id="div">
+    <img src="face1.png">
+</div>
+<img src="" id="img">
+<script>
+    var cc = {
+        x:10,
+        y:0
+    };
+    cc.i = new Image();
+    cc.i.src = '../abcd.jpg';
+    cc.u = new Image();
+    cc.u.src = 'face1.png';
+    cc.i.onload = function() {
+        cc.canvas = document.getElementById('canvas');
+        cc.canvas.width = cc.i.naturalWidth;
+        cc.canvas.height = cc.i.naturalHeight;
+        cc.cxt = cc.canvas.getContext('2d');
+
+        var div = document.getElementById('div');
+        div.style.width = cc.i.naturalWidth+'px';
+        div.style.height = cc.i.naturalHeight+'px';
+
+        cc.cxt.drawImage(cc.i, 0, 0);
+
+
+        cc.btcancas = document.createElement('canvas');
+        cc.btcancas.width = cc.canvas.width;
+        cc.btcancas.height = cc.canvas.height;
+        cc.btcxt = cc.btcancas.getContext('2d');
+
+
+        var tcanvas = document.createElement('canvas');
+        tcanvas.width = cc.u.naturalWidth;
+        tcanvas.height = cc.u.naturalHeight;
+        var tcxt = tcanvas.getContext('2d');
+
+
+        var timg = document.getElementById('img');
+        timg.width = cc.u.naturalWidth;
+        timg.height = cc.u.naturalHeight;
+
+
+        var mtdown = false,
+            mtdownX,//mouse.x  or  touch.x
+            mtdownY,
+            startPoint = {x:0,y:0};
+
+
+        //获取mouse or touch 位置
+        function getLocalCoords(elem, e) {
+
+            var ox = 0, oy = 0;
+            var first;
+            var pageX, pageY;
+            while (elem != null) {
+                ox += elem.offsetLeft;
+                oy += elem.offsetTop;
+                elem = elem.offsetParent;
+            }
+            if (e.hasOwnProperty('changedTouches')) {
+                first = e.changedTouches[0];
+                pageX = first.pageX;
+                pageY = first.pageY;
+            } else {
+                pageX = e.pageX;
+                pageY = e.pageY;
+            }
+            return { 'x': pageX - ox, 'y': pageY - oy };
+        }
+
+        //图片拖拽
+        //mousedown or touchstart
+        function mtDown(e) {
+            e.preventDefault();
+            mtdown = true;
+            var local = getLocalCoords(cc.canvas, e);
+            mtdownX = local.x;
+            mtdownY = local.y;
+        }
+
+        //mousemove or touchmove
+        function mtMove(e) {
+            e.preventDefault();
+            if (mtdown) {
+                if (e.changedTouches) {
+                    e = e.changedTouches[e.changedTouches.length - 1];
+                }
+                var local = getLocalCoords(cc.canvas, e);
+                var x = local.x - mtdownX + startPoint.x;
+                var y = local.y - mtdownY + startPoint.y;
+
+                draw(x, y);
+            }
+        }
+
+        //mouseup or touchend
+        function mtUp(e) {
+            e.preventDefault();
+            mtdown = false;
+            var local = getLocalCoords(cc.canvas, e);
+            var x = local.x - mtdownX + startPoint.x;
+            var y = local.y - mtdownY + startPoint.y;
+
+            startPoint = {
+                x: x,
+                y: y
+            };
+
+            draw(x, y);
+        }
+
+        function draw(x, y) {
+            cc.cxt.clearRect(0, 0, cc.canvas.width, cc.canvas.height);
+            cc.cxt.drawImage(cc.i, x, y);
+
+            if (mtdown) {return;}
+            cc.btcxt.clearRect(0, 0, cc.btcancas.width, cc.btcancas.height);
+            var d = cc.cxt.getImageData(0, 0, cc.canvas.width, cc.canvas.height);
+            cc.btcxt.putImageData(d, 0, 0);
+//            cc.btcxt.drawImage(cc.canvas, 0, 0, cc.canvas.width, cc.canvas.height, 0, 0, cc.canvas.width, cc.canvas.height);
+//            timg.src = cc.btcancas.toDataURL();
+//            return;
+
+            cc.btcxt.globalCompositeOperation = 'destination-in';
+            cc.btcxt.drawImage(cc.u, 0, 0, cc.u.naturalWidth, cc.u.naturalHeight, cc.x, cc.y, cc.u.naturalWidth, cc.u.naturalHeight)
+
+            var dd = cc.btcxt.getImageData(cc.x, cc.y, cc.u.naturalWidth, cc.u.naturalHeight);
+            tcxt.clearRect(0, 0, tcanvas.width, tcanvas.height);
+
+            tcxt.putImageData(dd, 0, 0);
+            timg.src = tcanvas.toDataURL();
+        }
+
+
+//        var targetele = document.getElementById('div');
+        div.addEventListener('mousedown', mtDown, false);
+        div.addEventListener('touchstart', mtDown, false);
+        div.addEventListener('mousemove', mtMove, false);
+        div.addEventListener('touchmove', mtMove, false);
+        div.addEventListener('mouseup', mtUp, false);
+        div.addEventListener('touchend', mtUp, false);
+    }
+
+</script>
+</body>
+</html>

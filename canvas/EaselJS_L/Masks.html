@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title></title>
+    <script src="../EaselJS-master/lib/easeljs-NEXT.combined.js"></script>
+    <script>
+        var img, star, stage;
+        var scale;
+        var angle;
+
+        function init() {
+            img = new Image();
+            img.onload = handleImageLoad;
+            img.src = '../EaselJS-master/_assets/art/flowers.jpg';
+            angle = 0;
+        }
+
+        function handleImageLoad() {
+            stage = new createjs.Stage('testCanvas');
+            star = new createjs.Shape();
+            star.x = img.width/2;
+            star.y = img.height/2;
+
+            star.graphics.s('#ff0').ss(5).dp(0, 0, img.height/2-15, 5, 0.6).cp();
+
+            var bg = new createjs.Bitmap(img);
+            bg.filters = [
+                    new createjs.BlurFilter(2,2,2),
+                    new createjs.ColorMatrixFilter(new createjs.ColorMatrix(0, 0, -100, 0))
+            ];
+            bg.cache(0, 0, img.width, img.height);
+            stage.addChild(bg);
+
+            var bmp = new createjs.Bitmap(img);
+            stage.addChild(bmp);
+
+            bmp.mask = star;
+
+            stage.addChild(star);
+            createjs.Ticker.addEventListener('tick',tick);
+        }
+
+        function tick(event) {
+
+            star.rotation += 5;
+            star.scaleX = star.scaleY = 1.5 + Math.sin(angle) * 3;
+
+            stage.update(event);
+            angle += 0.025;
+        }
+    </script>
+</head>
+<body onload="init()">
+<div>
+    <canvas id="testCanvas" width="960" height="400"></canvas>
+</div>
+</body>
+</html>

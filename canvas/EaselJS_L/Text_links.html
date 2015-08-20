@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title></title>
+    <script src="../EaselJS-master/lib/easeljs-NEXT.combined.js"></script>
+    <script>
+        function TextLink(text, font, color, hoverColor) {
+            this.Text_constructor(text, font, color);
+            this.hoverColor = hoverColor;
+            this.hover = false;
+            this.hitArea = new createjs.Shape();
+            this.textBaseline = 'top';
+
+            this.addEventListener('rollover', this);
+            this.addEventListener('rollout', this);
+        }
+
+        createjs.extend(TextLink, createjs.Text);
+
+        TextLink.prototype.draw = function(ctx, ignoreCache) {
+            var color = this.color;
+            if (this.hover) {
+                this.color = this.hoverColor;
+            }
+
+            this.Text_draw(ctx, ignoreCache);
+
+            this.color = color;
+
+            this.hitArea.graphics.clear().beginFill('#fff')
+                    .drawRect(0, 0, this.getMeasuredWidth(), this.getMeasuredHeight());
+        };
+
+        TextLink.prototype.handleEvent = function(evt) {
+            this.hover = (evt.type == 'rollover');
+        };
+
+
+        createjs.promote(TextLink, 'Text');
+    </script>
+
+    <script>
+        var canvas;
+        var stage;
+
+        function handleClick(evt) {
+            alert('You clicked on: ' + evt.target.text);
+        }
+
+        function init() {
+            canvas = document.getElementById('testCanvas');
+            stage = new createjs.Stage(canvas);
+
+            var rect = new createjs.Shape();
+            rect.graphics.f('#111').r(0, 0, canvas.width, canvas.height);
+            rect.x = 0;
+            rect.y = 0;
+            stage.addChild(rect);
+
+            stage.enableMouseOver(20);
+//            stage.mouseMoveOutside = true;
+
+            var links = ['yellow', 'blue', 'red', 'purple', 'orange'];
+            links.forEach(function(item, index, array) {
+                var link = new TextLink(item+' link!', '36px Arial', item, '#fff');
+                link.x = 100;
+                link.y = 50 + index * 50;
+                link.addEventListener('click', handleClick);
+                link.cursor = 'pointer';
+                stage.addChild((link));
+            });
+
+            createjs.Ticker.addEventListener('tick', stage);
+        }
+    </script>
+</head>
+<body onload="init()">
+<div>
+    <canvas id="testCanvas" width="960" height="400" ></canvas>
+</div>
+</body>
+</html>

@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <!--<script src='jquery-1.9.1.js'></script>-->
+    <script src='jcanvas.min.js'></script>
+    <script src="http://code.jquery.com/jquery-1.10.2.min.js" type="text/javascript"></script>
+    <script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js" type="text/javascript"></script>
+
+    <!--<script src='js/jquery.mobile-1.2.0.min.js'></script> -->
+    <script>
+        var maxX=-1;
+        var maxY=-1;
+        var minX=99999;
+        var minY=99999;
+        function checkData(event){
+            var x=event.pageX-$('canvas').offset().left;
+            var y=event.pageY-$('canvas').offset().top;
+            if(x>maxX){
+                maxX=x;
+            }else if(x<minX){
+                minX=x;
+            }
+            if(y>maxY){
+                maxY=y;
+            }else if(y<minY){
+                minY=y;
+            }
+        }
+        $(function(){
+            var obj=$('canvas');
+            var temp_e;
+            var temp_draw=false;
+
+            obj.on({
+                mousedown:function(e){
+                    temp_e=e;
+                    temp_draw=true;
+                    checkData(e);
+                },
+                mousemove:function(e){
+                    if(temp_draw){
+                        obj.drawLine({
+                            strokeStyle: '#000',
+                            strokeWidth: 3,
+                            x1: temp_e.pageX-$('canvas').offset().left, y1: temp_e.pageY-$('canvas').offset().top,
+                            x2: e.pageX-$('canvas').offset().left, y2: e.pageY-$('canvas').offset().top,
+                        });
+                    }
+                    temp_e=e;
+                    checkData(e);
+                },
+                mouseup:function(e){
+                    temp_e=null;
+                    temp_draw=false;
+                    checkData(e);
+                },
+                mouseout:function(){
+                    temp_e=null;
+                    temp_draw=false;
+                }
+            });
+            $("#clean").on("click",function(){
+                maxX=-1;
+                maxY=-1;
+                minX=99999;
+                minY=99999;
+                obj.clearCanvas();
+            });
+            $("#save").on("click",function(){
+                var image=obj.getCanvasImage("png");
+                alert(image);
+            });
+
+        });
+    </script>
+</head>
+<body>
+<input type="button" id="save" value="保存" />
+<input type="button" id="clean" value="清除" />
+<br/>
+<canvas width='320' height='480' style="background:#f00"></canvas>
+<div id="points"></div>
+</body>
+</html>

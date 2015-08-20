@@ -1,0 +1,9 @@
+div#hFinderFiles {
+    height: expression(document.body.offsetHeight - 23);
+    width: expression(document.body.offsetWidth);
+}
+div.hFinderIcon div {
+    background: none;
+    filter: progid:DXImageTransform.Microsoft.AlphaImageLoader
+      (src='../../../Images/Finder/Folder 48x48.png', sizingMethod='crop');
+}

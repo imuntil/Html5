@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title></title>
+    <style>
+        html, body{
+            margin: 0;
+            height: 100%;
+            background-color: #012e72;
+            font-family: 'microsoft yahei';
+            overflow: hidden;
+        }
+        .show-box{
+            width: 320px;
+            height: 320px;
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            margin: -160px 0 0 -160px;
+        }
+        .show-list{
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+        .show-list div{
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+        .show-list-1{
+            height: 160px;
+            background-color: #fde685;
+        }
+        .show-list-2, .show-list-3 {
+            width: 160px;
+            height: 160px;
+            float: left;
+        }
+        .show-list-2{
+            background-color: #ffffff;
+        }
+        .show-list-3{
+            background-color: #ae312f;
+        }
+        .shape-svg{
+            position: absolute;
+            left: 0px;
+            bottom: 0;
+        }
+
+
+    </style>
+    <script src="../Snap.svg-0.3.0/dist/snap.svg.js"></script>
+</head>
+<body>
+<div class="show-box">
+    <div class="show-list show-list-1 showList" data-svgcolor="#ffaa8e">
+        <div></div>
+    </div>
+    <div class="show-list show-list-2 showList" data-svgcolor="#ffdfba">
+        <div></div>
+    </div>
+    <div class="show-list show-list-3 showList" data-svgcolor="#211a1b">
+        <div></div>
+    </div>
+</div>
+<script>
+    var eleList = document.querySelectorAll('.showList');
+    Array.prototype.space = function() {
+        return this.join(' ');
+    };
+
+    [].slice.call(eleList).forEach(function(list, index, array) {
+        var svg_width = list.clientWidth * 1.5,
+                svg_height = list.clientHeight * 1.5;
+
+        var svg_color = list.getAttribute('data-svgcolor');
+
+        var svg = Snap(svg_width, svg_height).attr({
+            fill: svg_color,
+            class:'shape-svg'
+        });
+
+        var path = svg.paper.path('');
+
+        list.appendChild(svg.node);
+
+
+        var p1 = [0, 0], p2 = [svg_width, 0], p3 = [svg_width, svg_height];
+        var p4_start = [svg_width, 0], p4_end = [0, svg_height];
+
+        //y = ax + b;
+        var a = -1*svg_height/svg_width, b = svg_height;
+
+        list.addEventListener('mouseover', function() {
+            Snap.animate(svg_width, 0, function(x) {
+                var p4 = [x, a * x + b];
+
+                path.attr({
+                    d:'M'+[p1.space(), p2.space(), p3.space(), p4.space(), p1.space()].join('L')+'Z'
+                });
+            }, 200, mina.easein);
+        });
+
+        list.addEventListener('mouseout', function() {
+            Snap.animate(0, svg_width, function(x) {
+                var p4 = [x, a * x + b];
+
+                path.attr({
+                    d:'M'+[p1.space(),p2.space(),p3.space(),p4.space(),p1.space()].join('L') + 'Z'
+                });
+            }, 250, mina.easeout);
+        });
+    });
+</script>
+</body>
+</html>

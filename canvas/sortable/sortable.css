@@ -1,0 +1,21 @@
+body {
+    font:12px "lucida grande",Arial,sans-serif;
+    background:#fff;
+    color:rgb(50,50,50);
+    margin: 0;
+    padding: 0;
+}
+
+ul {
+    list-style: none;
+    width: 250px;
+    margin: 5px;
+    padding: 0px;
+}
+
+li {
+    background: lightblue;
+    padding: 3px;
+    width: 250px;
+    border: 1px solid #90c5c6;
+}

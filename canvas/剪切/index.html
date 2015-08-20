@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title></title>
+    <!--<script src="http://code.jquery.com/jquery-1.10.2.min.js" type="text/javascript"></script>-->
+    <!--<script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js" type="text/javascript"></script>-->
+    <script>
+        var cc = {
+            x:10,
+            y:0
+        };
+        cc.i = new Image();
+        cc.i.src = '../abcd.jpg';
+        cc.u = new Image();
+        cc.u.src = 'face1.png';
+        cc.i.onload = function() {
+            cc.canvas = document.getElementById('canvas');
+            cc.canvas.width = cc.i.naturalWidth;
+            cc.canvas.height = cc.i.naturalHeight;
+            cc.cxt = cc.canvas.getContext('2d');
+
+            cc.cxt.drawImage(cc.i, 0, 0);
+
+            cc.cxt.globalCompositeOperation = 'destination-in';
+            cc.cxt.drawImage(cc.u, 0, 0, cc.u.naturalWidth, cc.u.naturalHeight, cc.x, cc.y, cc.u.naturalWidth, cc.u.naturalHeight)
+
+
+            cc.cdata = cc.cxt.getImageData(cc.x, cc.y, cc.u.naturalWidth, cc.u.naturalHeight);
+            var tcanvas = document.createElement('canvas');
+            tcanvas.width = cc.u.naturalWidth;
+            tcanvas.height = cc.u.naturalHeight;
+            var tcxt = tcanvas.getContext('2d');
+            tcxt.putImageData(cc.cdata, 0, 0);
+
+            var timg = document.getElementById('img');
+            timg.width = cc.u.naturalWidth;
+            timg.height = cc.u.naturalHeight;
+            timg.src = tcanvas.toDataURL();
+        }
+
+        //获取mouse or touch 位置
+        function getLocalCoords(elem, e) {
+
+            var ox = 0, oy = 0;
+            var first;
+            var pageX, pageY;
+            while (elem != null) {
+                ox += elem.offsetLeft;
+                oy += elem.offsetTop;
+                elem = elem.offsetParent;
+            }
+            if (e.hasOwnProperty('changedTouches')) {
+                first = e.changedTouches[0];
+                pageX = first.pageX;
+                pageY = first.pageY;
+            } else {
+                pageX = e.pageX;
+                pageY = e.pageY;
+            }
+            return { 'x': pageX - ox, 'y': pageY - oy };
+
+        }
+
+
+
+    </script>
+</head>
+<body>
+<canvas id="canvas"></canvas>
+<img src="" id="img">
+</body>
+</html>

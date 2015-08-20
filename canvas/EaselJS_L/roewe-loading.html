@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+    <script src="../EaselJS-master/lib/easeljs-0.8.0.combined.js"></script>
+    <script>
+        var stage;
+        var starContainer;
+        var lineContainer;
+        var starInit = [
+            {x:20,y:45,r:2},
+            {x:90,y:30,r:4},
+            {x:40,y:120,r:3},
+            {x:130,y:60,r:2},
+            {x:180,y:110,r:2},
+            {x:90,y:5,r:3},
+            {x:50,y:100,r:4},
+            {x:200,y:20,r:2}
+        ];
+        var count = 1;
+        function init() {
+            stage = new createjs.Stage('testCanvas');
+            starContainer = new createjs.Container();
+            starContainer.x = 300;
+            starContainer.y = 200;
+//            starContainer.regX = 100;
+//            starContainer.regY = 100;
+            lineContainer = new createjs.Shape().set({x:0,y:0});
+
+
+            starInit.forEach(function(item, index, array) {
+                var c = new createjs.Shape().set({x:item.x, y:item.y});
+                c.graphics.beginFill('#ffffff').drawCircle(0, 0, item.r);
+                starContainer.addChild(c);
+
+                if (index == 0) {
+                    lineContainer.graphics.beginStroke('#ffffff').setStrokeStyle(0.5).moveTo(item.x, item.y);
+                } else {
+                    lineContainer.graphics.lineTo(item.x, item.y);
+                }
+            });
+
+//            stage.addChild(lineContainer);
+            starContainer.addChildAt(lineContainer, 0);
+            stage.addChild(starContainer);
+
+            createjs.Ticker.addEventListener('tick', tick);
+            createjs.Ticker.timingMode = createjs.Ticker.RAF;
+//            createjs.Ticker.framerate = 10;
+            stage.update();
+        }
+
+        function tick(event) {
+            count ++;
+            starContainer.removeChildAt(0);
+            for (var i = 0; i < starContainer.numChildren; i++) {
+
+                var _c = starContainer.getChildAt(i);
+
+                var _v = Math.cos(Math.PI/360 * count * (i+1));
+                var _py = starInit[i].y * _v;
+
+                _c.y = _py;
+
+                if (i == 0) {
+                    lineContainer.graphics.clear().beginStroke('#ffffff').setStrokeStyle(0.5).moveTo(_c.x, _c.y);
+                } else {
+                    lineContainer.graphics.lineTo(_c.x, _c.y);
+                }
+
+            }
+            starContainer.addChildAt(lineContainer, 0);
+
+            starContainer.rotation += event.delta * 0.01;
+
+            stage.update(event);
+        }
+    </script>
+</head>
+<body onload="init()">
+<canvas id="testCanvas" width="960" height="400" style="background: #000000"></canvas>
+</body>
+</html>

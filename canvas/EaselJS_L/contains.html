@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title></title>
+    <script src="../EaselJS-master/lib/easeljs-NEXT.combined.js"></script>
+    <script>
+        function init() {
+            var stage = new createjs.Stage('testCanvas');
+            stage.name = 'stage';
+
+            var rect = new createjs.Shape().set({x:100,  y:200})
+            rect.graphics.beginFill('black')
+                    .drawCircle(0, 0, 100);
+//                    .drawRect(0, 0, 100, 200);
+            rect.name = 'rect';
+//            rect.x = 100;
+//            rect.y = 200;
+
+            stage.addChild(rect);
+//            var bounds = rect.getBounds();
+//            console.log(bounds);
+
+            stage.addEventListener('stagemousedown', function(e) {
+
+//                console.log(e.target.name);
+//                console.log(e);
+                var p = rect.globalToLocal(e.stageX, e.stageY);
+                console.log(p);
+                console.log(rect.hitTest(p.x, p.y));
+            });
+            stage.update();
+        }
+    </script>
+</head>
+<body onload="init()">
+<canvas id="testCanvas" width="960" height="400"></canvas>
+</body>
+</html>

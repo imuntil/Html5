@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title></title>
+</head>
+<body>
+<input type="file" id="Files" name="files[]" multiple />
+<div id="Lists"></div>
+<div id="dropZone" style="width: 100px;height: 60px; background-color: #000000"></div>
+<script>
+    function fileDrop(e) {
+        e = e || window.event;
+
+        e.stopPropagation();//组织冒泡
+        e.preventDefault();//阻止默认行为
+
+        var files = e.dataTransfer.files;
+
+        var output = [];
+
+        for (var i = 0, f; f = files[i]; i++) {
+            output.push('<li><strong>' + f.name + '</strong>(' + f.type + ') - ' + f.size +' bytes</li>');
+        }
+
+        document.getElementById('Lists').innerHTML = '<ul>' + output.join('') + '</ul>';
+    }
+
+    function dragOver(e) {
+        e = e || window.event;
+
+        e.stopPropagation();
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'copy';//执行拖放视觉效果
+    };
+
+    var d = document.getElementById('dropZone');
+
+    d.addEventListener('dragover', dragOver, false);
+    d.addEventListener('drop', fileDrop, false)
+</script>
+</body>
+</html>

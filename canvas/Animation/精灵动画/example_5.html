@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title></title>
+
+    <style>
+        body {
+            background: #eeeeee;
+        }
+
+        #thrustersCanvas {
+            background: rgba(255,255,255,0.4);
+            position: absolute;
+            left: 137px;
+            top: 170px;
+            border: thin solid rgba(0,0,0,1.0);
+            -webkit-box-shadow: rgba(0,0,0,0.5) 4px 4px 6px;
+            -moz-box-shadow: rgba(0,0,0,0.5) 4px 4px 6px;
+            box-shadow: rgba(0,0,0,0.5) 4px 4px 6px;
+        }
+
+        #canvas {
+            position: absolute;
+            left: 0px;
+            top: 20px;
+            margin-left: 20px;
+            background: lightskyblue;
+            border: thin solid rgba(0,0,0,1.0);
+            -webkit-box-shadow: rgba(0,0,0,0.5) 4px 4px 6px;
+            -moz-box-shadow: rgba(0,0,0,0.5) 4px 4px 6px;
+            box-shadow: rgba(0,0,0,0.5) 4px 4px 6px;
+        }
+    </style>
+</head>
+<body>
+
+<canvas id="canvas" width="350" height="300"></canvas>
+<div id="thrustersDiv">
+    <canvas id="thrustersCanvas" width="110" height="50"></canvas>
+</div>
+
+<script src="stopwatch.js"></script>
+<script src="animationTimer.js"></script>
+<script src="../requestNextAnimationFrame.js"></script>
+<script src="Sprite.js"></script>
+
+<script>
+    var canvas = document.getElementById('canvas'),
+            context = canvas.getContext('2d'),
+
+            thrustersCanvas = document.getElementById('thrustersCanvas'),
+            thrustersContext = thrustersCanvas.getContext('2d'),
+
+            _right = 1,
+            _left = 2,
+            _arrow_margin = 10,
+            _ball_radius = 15,
+            _ledge_left = 150,
+            _ledge_top = 90,
+            _ledge_width = 44,
+            _ledge_height = 12,
+            _animation_duration = 200,
+
+            _thrusters_fill_style = 'rgba(100, 140, 230, 0.8)',
+            _thruster_firing_fill_style = 'rgba(255, 255, 0, 0.8)',
+
+            lastTime = 0,
+            arrow = _left,
+
+            pushTimer = new AnimationTimer(_animation_duration),
+
+            moveBall = {
+                lastTime : undefined,
+
+                resetBall: function() {
+                    ball.left = _ledge_left + _ledge_width/2 - _ball_radius;
+                    ball.top = _ledge_top - _ball_radius*2;
+                },
+
+                execute: function(sprite, context, time) {
+                    var timerElapsed = pushTimer.getElapsedTime(),
+                            frameElapsed;
+
+                    if (pushTimer.isRunning() && this.lastTime !== undefined) {
+                        frameElapsed = timerElapsed - this.lastTime;
+
+                        if (arrow == _left) ball.left -= ball.velocityX * (frameElapsed/1000);
+                        else                ball.left += ball.velocityX * (frameElapsed/1000);
+
+                        if ((isBallOnLedge() && pushTimer.isOver()) || !isBallOnLedge()) {
+                            pushTimer.stop();
+                        }
+
+                        if (!isBallOnLedge()) {
+                            this.resetBall();
+                        }
+                    }
+
+                    this.lastTime = timerElapsed;
+                }
+            },
+
+
+            ball = new Sprite(
+                    'ball',
+                    {
+                        paint:function(sprite, context) {
+                            context.save();
+                            context.beginPath();
+                            context.arc(sprite.left + sprite.width/2, sprite.top + sprite.height/2,
+                                        _ball_radius, 0, Math.PI*2, false);
+                            context.clip();
+
+                            context.shadowColor = 'rgb(0,0,255)';
+                            context.shadowOffsetX = -4;
+                            context.shadowOffsetY = -4;
+                            context.shadowBlur = 8;
+
+                            context.lineWidth = 2;
+                            context.strokeStyle = 'rgb(100, 100, 195)';
+                            context.stroke();
+
+                            context.beginPath();
+                            context.arc(sprite.left + sprite.width/2, sprite.top + sprite.height/2,
+                                        _ball_radius/2, 0, Math.PI*2, false);
+                            context.clip();
+
+                            context.shadowColor = 'rgb(255, 255, 0)';
+                            context.shadowOffsetX = -4;
+                            context.shadowOffsetY = -4;
+                            context.shadowBlur = 8;
+                            context.stroke();
+
+                            context.restore();
+                        }
+                    },
+                    [moveBall]
+            ),
+
+            ledge = new Sprite(
+                    'ledge',
+                    {
+                        paint:function(sprite, context) {
+                            context.save();
+                            context.shadowColor = 'rgba(0, 0, 0, 0.8)';
+                            context.shadowBlur = 8;
+                            context.shadowOffsetX = 4;
+                            context.shadowOffsetY = 4;
+
+                            context.fillStyle = 'rgba(255, 255, 0, 0.6)';
+                            context.fillRect(sprite.left, sprite.top, sprite.width, sprite.height);
+                            context.restore();
+                        }
+                    }
+            );
+
+    function restartAnimation() {
+        if (pushTimer.isRunning()) {
+            pushTimer.stop();
+        }
+        pushTimer.start();
+    }
+
+    function pushBallLeft() {
+        arrow = _left;
+        restartAnimation();
+    }
+
+    function pushBallRight() {
+        arrow = _right;
+        restartAnimation();
+    }
+
+    function paintThrusters() {
+        thrustersCanvas.clearRect(0, 0, thrustersCanvas.width, thrustersCanvas.height);
+
+        if (arrow === _left) {
+            thrustersContext.fillStyle = pushTimer.isRunning() ?
+                    _thruster_firing_fill_style : _thrusters_fill_style;
+
+            paintLeftArrow(thrustersContext);
+            thrustersContext.fillStyle = _thrusters_fill_style;
+            paintRightArrow(thrustersContext);
+        } else {
+            thrustersContext.fillStyle = pushTimer.isRunning() ?
+                    _thruster_firing_fill_style : _thrusters_fill_style;
+            paintRightArrow(thrustersContext);
+            thrustersContext.fillStyle = _thrusters_fill_style;
+            paintLeftArrow(thrustersContext);
+        }
+    }
+
+    function paintArrow(context) {
+        context.beginPath();
+        context.moveTo( thrustersCanvas.width/2 - _arrow_margin/2, _arrow_margin/2);
+        context.lineTo( thrustersCanvas.width/2 - _arrow_margin/2, thrustersCanvas.height = _arrow_margin);
+        context.quadraticCurveTo(thrustersCanvas.width/2 - _arrow_margin/2,
+        thrustersCanvas.height/2 - _arrow_margin/2, thrustersCanvas.width/2 - _arrow_margin,
+        thrustersCanvas.height - _arrow_margin/2);
+        context.lineTo(_arrow_margin, thrustersCanvas.height/2 + _arrow_margin/2);
+        context.quadraticCurveTo(_arrow_margin - 3, thrustersCanvas.height/2,
+        _arrow_margin, thrustersCanvas.height/2 - _arrow_margin/2);
+        context.lineTo(thrustersCanvas.width/2 - _arrow_margin, _arrow_margin/2);
+        context.quadraticCurveTo(thrustersCanvas.width/2 - _arrow_margin, _arrow_margin/2,
+        thrustersCanvas.width/2 - _arrow_margin/2, _arrow_margin/2);
+        context.fill();
+        context.stroke();
+    }
+
+    function paintLeftArrow(context) {
+        paintArrow(context);
+    }
+
+    function paintRightArrow(context) {
+        thrustersContext.save();
+        thrustersContext.translate(thrustersCanvas.width, 0);
+        thrustersContext.scale(-1, 1);
+        paintArrow(context);
+        thrustersContext.restore();
+    }
+
+    thrustersCanvas.onmousedown = function(e) {
+        var rect = thrustersCanvas.getBoundingClientRect(),
+                x = e.x || e.clientX,
+                y = e.x || e.clientY;
+
+        e.preventDefault();
+        e.stopPropagation();
+
+        if (x - rect.left > thrustersCanvas.width/2) {
+            pushBallRight();
+        } else {
+            pushBallLeft();
+        }
+    };
+
+    function calculateFps(time) {
+        var fps = 1000 / (time - lastTime);
+        lastTime = time;
+        return fps;
+    }
+
+    function animate(time) {
+        var fps = calculateFps(time);
+
+        context.clearRect(0, 0, canvas.width, canvas.height);
+        ball.update(context, time);
+        ball.paint(context);
+
+        ledge.update(context, time);
+        ledge.paint(context);
+
+        paintThrusters();
+
+        window.requestAnimationFrame(animate);
+    }
+
+</script>
+</body>
+</html>

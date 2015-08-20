@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title></title>
+</head>
+<body>
+<canvas id="canvas" width="620" height="360"></canvas>
+<a id="btn">fade</a>
+
+<script>
+    var Tt = function(src){
+        this.img = new Image();
+        this.canvas = document.getElementById('canvas');
+        this.cxt = this.canvas.getContext('2d');
+        this.fadeBtn = document.getElementById('btn');
+        this.originalImageData = null;
+        this.interval = null;
+        this.img.src = src;
+        this.onload = this.imgOnload();
+    };
+
+    Tt.prototype.fadeOut = function(context, imagedata, x, y, steps, millisecondsPerStep) {
+        var frame = 0,
+            length = imagedata.data.length,
+            that = this;
+
+        this.interval = setInterval(function() {
+            frame ++;
+
+            if (frame > steps) {
+                clearInterval(that.interval);
+                that.animationComplete();
+            } else {
+                that.increaseTransparency(imagedata, steps);
+                that.cxt.putImageData(imagedata, x, y);
+            }
+        }, millisecondsPerStep);
+    };
+
+    Tt.prototype.increaseTransparency = function(imagedata, steps) {
+        var alpha, currentAlpha, step, length = imagedata.data.length;
+
+        for (var i = 3; i < length; i += 4) {
+            alpha = this.originalImageData.data[i];
+            if (alpha > 0 && imagedata.data[i] > 0) {
+                currentAlpha = imagedata.data[i];
+                step = Math.ceil(alpha/steps);
+
+                if (currentAlpha - step > 0) {
+                    imagedata.data[i] -= step;
+                } else {
+                    imagedata.data[i] = 0;
+                }
+            }
+        }
+    };
+
+    Tt.prototype.animationComplete = function() {
+        var that = this;
+        setTimeout(function() {
+            that.cxt.drawImage(that.img, 0, 0, that.canvas.width, that.canvas.height);
+        }, 1000);
+    };
+
+    Tt.prototype.imgOnload = function() {
+        var that = this;
+        that.img.onload = function() {
+            that.cxt.drawImage(that.img, 0, 0, that.canvas.width, that.canvas.height);
+            that.originalImageData = that.cxt.getImageData(0, 0, that.canvas.width, that.canvas.height);
+        }
+    };
+
+    var tt = new Tt('../../pic/t.png');
+
+    tt.fadeBtn.onclick = function() {
+//        console.log(tt);
+        tt.fadeOut(tt.cxt, tt.cxt.getImageData(0, 0, tt.canvas.width, tt.canvas.height), 0, 0, 40, 1000/60);
+    };
+
+</script>
+</body>
+</html>

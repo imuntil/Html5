@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title></title>
+    <script src="zepto.js"></script>
+</head>
+<body>
+<div id="choose" style="height: 100px; width: 100px; margin-left: 30px; margin-top: 20px; background-color: hotpink; overflow: hidden">
+    choose photo
+    <input type="file" style="margin-top: 300px" id="input">
+</div>
+
+<div style="width: 320px; height: 320px">
+    <img src="" id="photofile">
+</div>
+
+<canvas id="photocanvas" width="320" height="320"></canvas>
+<canvas id="filletcanvas" width="320" height="465"></canvas>
+<canvas id="workcanvas" width="360" height="540"></canvas>
+<!--<canvas id="textline" width="335" height="232"></canvas>-->
+
+<script>
+    //照片canvas
+//    var photocanvas = document.createElement('canvas');
+    var photocanvas = document.getElementById('photocanvas');
+    photocanvas.width = 320;
+    photocanvas.height = 320;
+
+    var photocxt = photocanvas.getContext('2d');
+
+
+
+    //圆角canvas
+//    var filletcanvas = document.createElement('canvas');
+    var filletcanvas = document.getElementById('filletcanvas');
+    filletcanvas.width = 320;
+    filletcanvas.height = 470;
+
+    var filletcxt = filletcanvas.getContext('2d');
+
+
+    //载体canvas
+    var workcanvas = document.getElementById('workcanvas');
+    var workcxt = workcanvas.getContext('2d');
+
+
+    var imgCount = 0;
+    function imageLoad() {
+        imgCount ++;
+        if (imgCount == 4) {
+            syntheticImg();
+        }
+    }
+
+    function syntheticImg() {
+        photocxt.drawImage(photo, 500, 150, 320, 320, 0, 0, 320, 320);
+//        photocxt.drawImage(illustratoin, 0, 0, illustratoin.width, illustratoin.height, 0, 0, photocanvas.width, photocanvas.height);
+
+        //照片和插图
+        filletcxt.save();
+        filletcxt.beginPath();
+        filletcxt.moveTo(0, 20);
+        filletcxt.quadraticCurveTo(0, 0, 20, 0);
+        filletcxt.lineTo(300, 0);
+        filletcxt.quadraticCurveTo(320, 0, 320, 20);
+        filletcxt.lineTo(320, 450);
+        filletcxt.quadraticCurveTo(320, 470, 300, 470);
+        filletcxt.lineTo(20, 470);
+        filletcxt.quadraticCurveTo(0, 470, 0, 450);
+        filletcxt.closePath();
+//        filletcxt.stroke();
+        filletcxt.clip();
+        filletcxt.fillStyle = '#f3ebe6';
+        filletcxt.fill();
+        filletcxt.drawImage(photocanvas, 0, 0);
+        filletcxt.drawImage(illustratoin, 0, 0, illustratoin.width, illustratoin.height, 0, 0, filletcanvas.width, photocanvas.height);
+        filletcxt.restore();
+
+
+        //头像
+        filletcxt.save();
+        filletcxt.beginPath();
+        filletcxt.arc(70, 390, 50, 0, Math.PI*2, false);
+        filletcxt.shadowColor = '#888';
+        filletcxt.shadowBlur = 2;
+        filletcxt.shadowOffsetX = 2;
+        filletcxt.shadowOffsetY = 2;
+        filletcxt.fill();
+        filletcxt.clip();
+//
+        filletcxt.drawImage(headportrait, 0, 0, headportrait.width, headportrait.height, 20, 340, 100, 100);
+        filletcxt.restore();
+
+        //心情文案背景
+//        filletcxt.save();
+        filletcxt.drawImage(textline, 0, 0, textline.width, textline.height, 140, 340, 160, 110);
+//        filletcxt.restore();
+        filletcxt.save();
+        filletcxt.fillStyle = '#2d75b6';
+        filletcxt.font = '15px Arial';
+        filletcxt.textAlign = 'left';
+        filletcxt.textBaseline = 'center';
+        filletcxt.fillText('Jenny 今天的好心情', 145, 355);
+        filletcxt.restore();
+
+        //心情文字
+        var string = 'good moring! 我是Jenny，我现在在New York哦!!';
+        filletcxt.save();
+        filletcxt.fillStyle = '#555555';
+        filletcxt.font = '14px Arial';
+        filletcxt.textAlign = 'left';
+        filletcxt.textBaseline = 'center';
+        var lineArray = stringAnalysises(string);
+        console.log(lineArray);
+        for (var  i = 0; i < lineArray.length; i++) {
+            if (lineArray[i].length > 0) {
+                var line = lineArray[i].join('');
+                filletcxt.fillText(line, 145, 362 + 20*(i+1));
+            }
+        }
+
+
+        //绘制载体
+        workcxt.save();
+        workcxt.fillStyle = '#2d75b6';
+        workcxt.fillRect(0, 0, workcanvas.width, workcanvas.height);
+        workcxt.restore();
+
+        workcxt.save();
+        workcxt.beginPath();
+        workcxt.moveTo(20, 40);
+        workcxt.quadraticCurveTo(20, 20, 40, 20);
+        workcxt.lineTo(320, 20);
+        workcxt.quadraticCurveTo(340, 20, 340, 40);
+        workcxt.lineTo(340, 470);
+        workcxt.quadraticCurveTo(340, 490, 320, 490);
+        workcxt.lineTo(40, 490);
+        workcxt.quadraticCurveTo(20, 490, 20, 470);
+        workcxt.closePath();
+        workcxt.shadowColor = '#000';
+        workcxt.shadowBlur = 2;
+        workcxt.shadowOffsetX = 5;
+        workcxt.shadowOffsetY = 3;
+        workcxt.globalAlpha = 0.6;
+        workcxt.fill();
+        workcxt.restore();
+
+        workcxt.drawImage(filletcanvas, 0, 0, filletcanvas.width, filletcanvas.height,
+                20, 20, filletcanvas.width, filletcanvas.height);
+    }
+
+
+//    function drawText() {
+//        var ca = document.getElementById('textline');
+//        var cx = ca.getContext('2d');
+//
+//        cx.drawImage(textline, 0, 0);
+//        var string = 'good moring! 我是Jenny，我现在在New York哦';
+//
+//        cx.save();
+//        cx.fillStyle = '#111111';
+//        cx.font = '15px Arial';
+//        cx.textAlign = 'left';
+//        cx.textBaseline = 'center';
+//
+//        var lineArray = stringAnalysises(string);
+//        for (var  i = 0; i < lineArray.length; i++) {
+//            if (lineArray[i].length > 0) {
+//                var line = lineArray[i].join('');
+//                cx.fillText(line, 20, 30*(i+1));
+//            }
+//        }
+//    }
+
+    function stringAnalysis(string) {
+
+        //将字符串分割成数组
+        var stringArray = string.split('');
+//        console.log(stringArray);
+        //每行能够容纳的最大字符长度,24字符
+        var perLength = 24;
+
+        var result = [[],[],[],[]];
+        for (var i = 0, j = 0, k = 0; i < stringArray.length; i++) {
+            var char = stringArray[i];
+
+            if (char.match(/[^\x00-\xff]/ig) == null) {
+                j += 1;
+            } else {
+                j +=2;
+            }
+
+            if (j >= perLength) {
+                j = 0;
+                k ++;
+            }
+
+            result[k].push(char);
+        }
+
+        console.log(result);
+        return result;
+    }
+
+
+    function stringAnalysises(str) {
+        var stringArray = str.split(' ');
+//        console.log(stringArray);
+
+        var totalArray = [];
+        //每行能够容纳的最大字符长度,24字符
+        var perLength = 24;
+        var pat = /[^\x00-\xff]/ig;
+        var pt = /[^\x00-\xff]/i;
+        for (var i = 0; i < stringArray.length; i++) {
+
+            //如果字符片段有汉字
+            if (pat.test(stringArray[i])) {
+
+                //将字符片段分割成数组
+                var charArray = stringArray[i].split('');
+
+                //存放非汉字(双字节)
+                var singleBit = '';
+
+                for (var j = 0; j < charArray.length; j++) {
+
+                    if (pt.test(charArray[j])) {
+                        //如果本次是双字节。而singleBit又不为空，说明之前有单字节字符串，将之加入数组
+                        if (singleBit.length > 0) {
+                            totalArray.push(singleBit + ' ');
+                            singleBit = '';
+                        }
+
+                        //如果是汉字（双字节），直接加入数组
+                        totalArray.push(charArray[j]);
+
+                    } else {
+                        //如果不是双字节
+                        singleBit += charArray[j];
+
+                        //如果本次是字符片段的最后一次。说明之前有单字节字符串，将之加入数组
+                        if (j == charArray.length - 1) {
+                            if (singleBit.length > 0) {
+                                totalArray.push(singleBit + ' ');
+                                singleBit = '';
+                            }
+                        }
+                    }
+                }
+
+            } else {
+                totalArray.push(stringArray[i] + ' ');
+            }
+        }
+
+        //将数组分行,每行不得大于perLength
+        var result = [[],[],[],[]];
+        for (var k = 0, l = 0, m = 0; k < totalArray.length; k++) {
+            var chars = totalArray[k];
+            if (pt.test(chars)) {
+                l +=2;
+            } else {
+                l += chars.length;
+            }
+
+            if (l < perLength) {
+                result[m].push(chars);
+            } else {
+                l = chars.length;
+                m ++;
+                result[m].push(chars);
+            }
+
+        }
+
+        console.log('result:' + result);
+        return result;
+    }
+
+    //头像图片
+    var headportrait = new Image();
+    headportrait.src = 'hp.jpg';
+    headportrait.onload = function() {
+        imageLoad();
+    };
+
+    //照片
+    var photo = new Image();
+    photo.src = '40054624.png';
+    photo.onload = function() {
+        imageLoad();
+    };
+
+    //插画
+    var illustratoin = new Image();
+    illustratoin.src = 'ill.png';
+    illustratoin.onload = function() {
+        imageLoad();
+    };
+
+    //文本框？？
+    var textline = new Image();
+    textline.src = 'textline.png';
+    textline.onload = function() {
+        imageLoad();
+    };
+
+
+
+
+    function handleFiles(e) {
+        e = e || window.event;
+        var file = e.files[0] || e.target.files[0];
+
+        var reader = new FileReader();
+        reader.onload = function() {
+            document.getElementById('photofile').src = this.result;
+        };
+
+        reader.readAsDataURL(file);
+    }
+
+
+    $('#input').bind('change', function() {
+        handleFiles(this);
+    });
+
+    $('#choose').click(function() {
+        $('#input').trigger('click');
+    });
+
+</script>
+</body>
+</html>

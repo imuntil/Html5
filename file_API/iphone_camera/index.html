@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title></title>
+    <script src="../zepto.js"></script>
+</head>
+<body>
+<img id="photofile" src="" alt=""/>
+<input type="file" id="input" name="image" accept="image/*" capture="camera" style="margin-top: 100px">
+<script>
+    function handleFiles(e) {
+
+        var files = e || window.event,
+//        img = new Image(),
+                img = document.getElementById('photofile');
+
+        window.URL = window.URL || window.webkitURL;
+
+        if (window.URL) {
+            img.src = window.URL.createObjectURL(files.files[0]);
+
+            img.onload = function(ev) {
+                window.URL.revokeObjectURL(this.src);
+                layout();
+            }
+        } else if (window.FileReader) {
+            var reader = new FileReader();
+            reader.readAsDataURL(files[0]);
+            reader.onload = function(ev) {
+                img.src = this.result;
+                img.onload = function() {
+                    layout();
+                }
+            }
+        } else {
+            e.select();
+            e.blur();
+            var nfile = document.selection.createRange().text;
+            document.selection.empty();
+            img.src = nfile;
+            img.onload = function() {
+                layout();
+            }
+        }
+
+        function layout() {
+
+            alert(img.naturalWidth + '  ' + img.naturalHeight);
+//            $('#upload_area, #make_header, #make_btn').hide();
+//            $('#make_bg, #make_btn2').show();
+//            $("#make_content").height($("#make_content").width()*454/296);
+//            $('#img_area').height($('#img_area').width());
+//
+//            var cw = $('#img_area').width(),
+//                    nw = img.naturalWidth,
+//                    ch = $('#img_area').height(),
+//                    nh = img.naturalHeight;
+//
+//            workMake.scale = cw/nw;
+//            workMake.tx = -(nw - cw)/2;
+//            workMake.ty = -(nh - ch)/2;
+//
+//            var  value = [
+//                'translate3d(' + workMake.tx + 'px, ' + workMake.ty + 'px, 0)',
+//                'scale(' +  workMake.scale + ', ' +  workMake.scale + ')'];
+//            value = value.join(" ");
+//            img.style.webkitTransform = value;
+//            img.style.mozTransform = value;
+//            img.style.transform = value;
+//
+//            synthetic.init();
+//            t_g.init();
+        }
+    };
+
+    $('#input').change(function() {
+        handleFiles(this);
+    });
+</script>
+</body>
+</html>

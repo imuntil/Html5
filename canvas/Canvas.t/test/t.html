@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title></title>
+</head>
+<body>
+<canvas id="canvas" width="600" height="400"></canvas>
+<canvas id="canvas1" width="600" height="400"></canvas>
+<canvas id="canvas2" width="600" height="400"></canvas>
+<button onclick="drawRay()" >drawRay()</button>
+<script src="../plug/requestNextAnimationFrame.js"></script>
+<script>
+    var canvas = document.getElementById('canvas');
+    var context = canvas.getContext('2d');
+    var mouseDown = false;
+
+    var innerCanvas = document.getElementById('canvas1');
+//    var innerCanvas = document.createElement('canvas');
+    innerCanvas.width = 600;
+    innerCanvas.height = 400;
+    var innerContext = innerCanvas.getContext('2d');
+
+
+    var outerCancas = document.getElementById('canvas2');
+//    var outerCancas = document.createElement('canvas');
+    outerCancas.width = 600;
+    outerCancas.height = 400;
+    var outerContext = outerCancas.getContext('2d');
+
+    context.lineJoin = innerContext.lineJoin = outerContext.lineJoin = 'round';
+    context.lineWidth = innerContext.lineWidth = outerContext.lineWidth = 1;
+
+    var circle = {
+        cx:300,
+        cy:200,
+        r:150
+    };
+
+    function drawCircle() {
+        context.beginPath();
+        context.arc(circle.cx, circle.cy, circle.r, 0, Math.PI*2, false);
+        context.stroke();
+
+        context.beginPath();
+        context.arc(circle.cx, circle.cy, 3, 0, Math.PI*2, false);
+        context.fill();
+    }
+
+
+    function drawInnerCircle() {
+        innerContext.save();
+        innerContext.arc(circle.cx, circle.cy, circle.r, 0, Math.PI*2, false);
+//        innerContext.stroke();
+        innerContext.clip();
+    }
+
+    function drawOutterCircle() {
+        outerContext.save();
+        outerContext.beginPath();
+        outerContext.arc(circle.cx, circle.cy, circle.r, 0, Math.PI*2, false);
+
+        outerContext.fillStyle = 'red';
+        outerContext.strokeStyle = 'red';
+//        outerContext.stroke();
+        outerContext.fill();
+    }
+
+    drawCircle();
+    drawInnerCircle();
+    drawOutterCircle();
+
+    function getLocalCoords(elem, ev) {
+        var ox = 0, oy = 0;
+        var first;
+        var pageX, pageY;
+        while (elem != null) {
+            ox += elem.offsetLeft;
+            oy += elem.offsetTop;
+            elem = elem.offsetParent;
+        }
+        if (ev.hasOwnProperty('changedTouches')) {
+            first = ev.changedTouches[0];
+            pageX = first.pageX;
+            pageY = first.pageY;
+        } else {
+            pageX = ev.pageX;
+            pageY = ev.pageY;
+        }
+        return { 'x': pageX - ox, 'y': pageY - oy };
+    }
+
+    function touchBeginHandle(e) {
+        mouseDown = true;
+        e.preventDefault();
+
+        var local = getLocalCoords(canvas, e);
+
+        drawCurve(local, true);
+    }
+
+    function touchMoveHandle(e) {
+        if (!mouseDown) return;
+        e.preventDefault();
+
+        var local = getLocalCoords(canvas, e);
+
+        drawCurve(local, false);
+    }
+
+    function touchEndHandle(e) {
+        mouseDown = false;
+        e.preventDefault();
+
+        var local = getLocalCoords(canvas, e);
+
+        drawCurve(local, false);
+    }
+
+    function drawCurve(p, fresh) {
+        if (fresh) {
+            context.beginPath();
+            context.moveTo(p.x, p.y);
+
+            innerContext.beginPath();
+            innerContext.moveTo(p.x, p.y);
+
+            outerContext.beginPath();
+            outerContext.moveTo(p.x, p.y);
+        }
+        context.lineTo(p.x, p.y);
+
+        innerContext.lineTo(p.x, p.y);
+
+        outerContext.lineTo(p.x, p.y);
+
+        if (!mouseDown) {
+            context.closePath();
+
+            innerContext.closePath();
+            innerContext.fill();
+
+            outerContext.closePath();
+            outerContext.fill();
+        }
+
+        context.stroke();
+        innerContext.stroke();
+        outerContext.stroke();
+    }
+
+
+    window.addEventListener('mousedown', touchBeginHandle, false);
+    window.addEventListener('touchstart', touchBeginHandle, false);
+    window.addEventListener('mousemove', touchMoveHandle, false);
+    window.addEventListener('touchmove', touchMoveHandle, false);
+    window.addEventListener('mouseup', touchEndHandle, false);
+    window.addEventListener('touchend', touchEndHandle, false);
+
+
+
+
+    function drawRay() {
+        var i = 0;
+
+        context.save();
+
+        context.drawImage(outerCancas, 0, 0);
+
+//        context.clip();
+//        var _data = outerContext.getImageData(0, 0, outerCancas.width, outerCancas.height);
+//        context.putImageData(_data, 0, 0);
+//        context.clip();
+
+//        context.globalCompositeOperation = 'source-in';
+
+        context.strokeStyle = 'blue';
+        while(i < 360) {
+
+            context.beginPath();
+            context.moveTo(circle.cx, circle.cy);
+            var ii = Math.PI*2*i/360;
+            context.lineTo(400 * Math.cos(ii)+circle.cx, 400*Math.sin(ii)+circle.cy);
+            context.stroke();
+
+            i += 5;
+        }
+
+
+        context.drawImage(innerCanvas, 0, 0);
+        context.restore();
+    }
+
+//    drawRay();
+</script>
+</body>
+</html>

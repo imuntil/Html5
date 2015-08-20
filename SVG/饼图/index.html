@@ -1,0 +1,146 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>jQuery圆形饼状数据统计图表 - 站长素材</title>
+
+<style type="text/css">
+*{margin:0;padding:0;list-style-type:none;}
+a,img{border:0;}
+body{font:12px/180% Arial, Helvetica, sans-serif, "新宋体";}
+/* holder */
+#holder{margin:-350px 0 0 -350px;width:700px;height:700px;position:absolute;left:50%;top:50%;}
+</style>
+
+<script type="text/javascript" src="../jquery-2.1.0.min.js"></script>
+<script type="text/javascript" src="../Snap.svg/Snap.svg-0.3.0/dist/snap.svg-min.js"></script>
+
+
+</head>
+<body>
+
+<table>
+	<tbody>
+		<tr>
+			<th scope="row">Ruby</th>
+			<td>40%</td>
+		</tr>
+		<tr>
+			<th scope="row">JavaScript</th>
+			<td>26%</td>
+		</tr>
+		<tr>
+			<th scope="row">Shell</th>
+			<td>5%</td>
+		</tr>
+		<tr>
+			<th scope="row">Python</th>
+			<td>5%</td>
+		</tr>
+		<tr>
+			<th scope="row">PHP</th>
+			<td>4%</td>
+		</tr>
+		<tr>
+			<th scope="row">C</th>
+			<td>4%</td>
+		</tr>
+		<tr>
+			<th scope="row">Perl</th>
+			<td>3%</td>
+		</tr>
+		<tr>
+			<th scope="row">C++</th>
+			<td>2%</td>
+		</tr>
+		<tr>
+			<th scope="row">Java</th>
+			<td>2%</td>
+		</tr>
+		<tr>
+			<th scope="row">Objective-C</th>
+			<td>2%</td>
+		</tr>
+	</tbody>
+</table>
+	
+<div id="holder">
+    <svg id="svg" width="700" height="700"></svg>
+</div>
+<div style="text-align:center;clear:both">
+<p>适用浏览器：IE8、360、FireFox、Chrome、Safari、Opera、傲游、搜狗、世界之窗.</p>
+<p>来源：<a href="http://sc.chinaz.com/" target="_blank">站长素材</a></p>
+</div>
+
+<script type="text/javascript">
+//console.log(+(300 - 50 > 180));
+    function pieChart(cx, cy, r, values, labels, stroke, svg) {
+        var rad = Math.PI / 180;
+
+        function sector (cx, cy, r, startAngle, endAngle, params) {
+            var x1 = cx + r * Math.cos(startAngle * rad),
+                    x2 = cx + r * Math.cos(endAngle * rad),
+                    y1 = cy + r * Math.sin(startAngle * rad),
+                    y2 = cy + r * Math.sin(endAngle * rad);
+
+            var _p = 'M'+cx+','+cy+'L'+x1+','+y1+'A'+r+','+r+','+0+','+(+(endAngle - startAngle > 180))+','+
+                    '1'+','+x2+','+y2+'Z';
+
+            return svg.paper.path(_p).attr(params);
+        }
+
+        var angle = 0,
+                total = 0,
+                start = 0,
+                process = function(i) {
+                    var value = values[i],
+                            angleplus = 360 * value / total,
+                            popangle = angle + (angleplus / 2),
+                            color = Snap.hsb(start, 0.75, 1),
+                            ms = 500,
+                            delta = 30,
+                            bcolor = Snap.hsb(start, 1, 1),
+                            p = sector(cx, cy, r, angle, angleplus + angle, {fill:color, stroke:stroke, strokeWidth:1}),
+                            txt = svg.paper.text(cx + (r + delta + 50) * Math.cos(popangle * rad), cy + (r + delta + 25) * Math.sin(popangle * rad), labels[i])
+                                    .attr({fill:bcolor, stroke:'none', opacity:0, fontSize: 20}),
+                            num = svg.paper.text(cx + (r + delta - 60) * Math.cos(popangle * rad), cy + (r + delta - 50) * Math.sin(popangle * rad), values[i])
+                                    .attr({fill:'#000', stroke:'none', opacity:1, fontSize:10, fontWeight:'bold'});
+                    p.mouseover(function() {
+                        p.stop().animate({transform:'s1.1 1.1 ' + cx + ' ' + cy}, ms, mina.elastic);
+                        txt.stop().animate({opacity:1}, ms, mina.elastic);
+                    }).mouseout(function () {
+                        p.stop().animate({transform: ""}, ms, mina.elastic);
+                        txt.stop().animate({opacity: 0}, ms);
+                    });
+
+                    angle += angleplus;
+                    svg.add(num, p, txt);
+
+                    start += 0.1;
+                };
+
+        for (var i = 0, ii = values.length; i < ii; i++) {
+            total += values[i];
+        }
+
+        for (i = 0; i < ii; i++) {
+            process(i)
+        }
+    }
+</script>
+
+<script type="text/javascript">
+    var svg = Snap('#svg');
+    var values = [],
+            labels = [];
+    $("tr").each(function () {
+        values.push(parseInt($("td", this).text(), 10));
+        labels.push($("th", this).text());
+    });
+
+    pieChart(350, 350, 200, values, labels, '#ffffff', svg);
+
+</script>
+
+</body>
+</html>

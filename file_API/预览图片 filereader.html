@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title></title>
+    <style>
+        #file{
+            position: absolute;
+            left: 100px;
+            top: 100px;
+        }
+        #file2{
+            position: absolute;
+            left:100px;
+            top:200px;
+        }
+
+    </style>
+</head>
+<body>
+<input type="file" id="file" name="image" accept="image/*" capture="camera">
+<input type="file" id="file2" name="image" accept="image/*" capture="camera">
+<img src="" id="img">
+<div id="preview"></div>
+
+<script>
+    function filePreview(e) {
+        e = e || window.event;
+        var files = e.files || e.target.files;
+
+        var p = document.getElementById('preview');
+
+        for (var i = 0, f; f = files[i]; i++) {
+            var reader = new FileReader();
+            reader.onload = (function(file) {
+                return function(e) {
+                    var  span = document.createElement('span');
+                    span.innerHTML = '<img style="padding: 0 10px;" width="100" src="'+ this.result +'" alt="'+ file.name +'" />';
+                    p.insertBefore(span, null);
+                };
+            })(f);
+
+            reader.readAsDataURL(f);
+        }
+    }
+    document.getElementById('file').addEventListener('change', function() {
+        filePreview(this);
+    }, false);
+
+
+    function file2(e) {
+
+        var files = e || window.event;
+        var img = document.getElementById('img');
+
+        window.URL = window.URL || window.webkitURL;
+
+        img.src = window.URL.createObjectURL(files.files[0]);
+
+        img.onload = function(ev) {
+            window.URL.revokeObjectURL(this.src);
+        };
+    }
+
+    document.getElementById('file2').addEventListener('change', function() {
+        file2(this);
+    }, false);
+</script>
+</body>
+</html>

@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>购买大厅</title>
+    <script src="../jquery-2.1.0.min.js"></script>
+<body style="background-color: #514f4f;overflow: hidden;">
+<div class="nav" style="height:43px;line-height:43px;background-color: #CC0000;display:block;"><p>幸运大转盘</p>
+    <span class="bank"><a href="javascript:window.history.go(-1);" class="hand">返回</a></span>
+</div>
+<div style="width: 100%;padding-top:50px;">
+    <p style="margin:0px auto;line-height:20px;padding:5px 5px;width:95%;color: #747373;font-size:14px;background-color: #dedede;">
+        游戏规则：每次转动消费10积分,中奖后系统记录,客服会与您第一时间取得联系！
+    </p>
+</div>
+<div style="padding:5px 0px 0px 15px;">
+    <p>
+        <span style="font-size:16px;color:#fff;position: relative;top:10px;">当前积分1000</span>
+        <input id="spinBtn" type="button" value="开始抽奖" class="luckBtn" style="margin-top: 3px;">
+    </p>
+</div>
+<div style="width: 100%;text-align: center;margin:0px auto;">
+    <canvas id="wheelcanvas" width="500" height="500"></canvas>
+</div>
+<script type="application/javascript">
+    var LuckyWheel = function(src) {
+        this.src = src;
+        this.startAngle = 0;
+        this.spinTimeout = null;
+        this.spinAngleStart = 10;
+        this.spinTime = 0;
+        this.spinTimeTotal = 0;
+        this.winWidth = 500;
+    };
+
+    LuckyWheel.prototype.init = function(option) {
+
+        var that = this;
+        $.getJSON(this.src, function(data) {
+            that.colors = data.colors;
+            that.rewards = data.rewards;
+            that.arc = Math.PI*2/that.rewards.length;
+
+            that.canvas = document.getElementById('wheelcanvas');
+            that.cxt = that.canvas.getContext('2d');
+            that.outsideRadius = that.winWidth*0.4;
+            that.textRadius = that.winWidth*160/500;
+            that.insideRadius = that.winWidth*125/500;
+            that.draw();
+        });
+    };
+
+    LuckyWheel.prototype.draw = function() {
+        this.drawRouletteWheel();
+    };
+
+    LuckyWheel.prototype.drawRouletteWheel = function() {
+        this.cxt.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+        this.cxt.strokeStyle = '#CFCFCF';
+        this.cxt.lineWidth = 2;
+
+        this.cxt.font = 'blod 16px scans-serif';
+        this.cxt.fillStyle = '#fff';
+        this.cxt.arc(this.winWidth/2, this.winWidth/2, this.outsideRadius+15, 0, 2*Math.PI, true);
+        this.cxt.stroke();
+        this.cxt.fill();
+        this.cxt.save();
+
+        for(var i = 0; i < this.rewards.length; i++) {
+            var angle = this.startAngle + i*this.arc;
+
+            this.cxt.fillStyle = this.colors[i];
+            this.cxt.beginPath();
+            this.cxt.arc(this.winWidth/2, this.winWidth/2, this.outsideRadius, angle, angle+this.arc, false);
+            this.cxt.arc(this.winWidth/2, this.winWidth/2, 10, angle+this.arc, angle, true);
+            this.cxt.stroke();
+            this.cxt.fill();
+            this.cxt.save();
+
+            this.cxt.fillStyle = '#fff';
+            this.cxt.translate(this.winWidth/2+Math.cos(angle + this.arc/2) * this.textRadius, this.winWidth/2+Math.sin(angle + this.arc/2) * this.textRadius);
+            this.cxt.rotate(angle + this.arc/2 + Math.PI/2);
+            var text = this.rewards[i];
+            this.cxt.fillText(text, -this.cxt.measureText(text).width/2, 0);
+            this.cxt.restore();
+        }
+        this.cxt.fillStyle = "white";
+        this.cxt.beginPath();
+        this.cxt.moveTo(this.winWidth/2 - 4, this.winWidth/2 - (this.outsideRadius + 5));
+        this.cxt.lineTo(this.winWidth/2 + 4, this.winWidth/2 - (this.outsideRadius + 5));
+        this.cxt.lineTo(this.winWidth/2 + 4, this.winWidth/2 - (this.outsideRadius - 5));
+        this.cxt.lineTo(this.winWidth/2 + 9, this.winWidth/2 - (this.outsideRadius - 5));
+        this.cxt.lineTo(this.winWidth/2 + 0, this.winWidth/2 - (this.outsideRadius - 23));
+        this.cxt.lineTo(this.winWidth/2 - 9, this.winWidth/2 - (this.outsideRadius - 5));
+        this.cxt.lineTo(this.winWidth/2 - 4, this.winWidth/2 - (this.outsideRadius - 5));
+        this.cxt.lineTo(this.winWidth/2 - 4, this.winWidth/2 - (this.outsideRadius + 5));
+        this.cxt.fill();
+    };
+
+    LuckyWheel.prototype.spin = function() {
+        this.spinAngleStart = 50;
+        this.spinTime = 0;
+        this.spinTimeTotal = Math.random()*4 + 5 * 1000;
+        this.rotateWheel();
+    };
+
+    LuckyWheel.prototype.rotateWheel = function() {
+        this.spinTime += 20;
+        if (this.spinTime >= this.spinTimeTotal) {
+            this.stopRotateWheel();
+            return;
+        }
+
+        var spinAngle = this.spinAngleStart - this.easeOut(this.spinTime, 0, this.spinAngleStart, this.spinTimeTotal);
+        this.startAngle += (spinAngle * Math.PI / 180);
+        this.drawRouletteWheel();
+        var that = this;
+        this.spinTimeout = setTimeout(function() {
+            that.rotateWheel();
+        }, 20);
+    };
+
+    LuckyWheel.prototype.stopRotateWheel = function() {
+        var that = this;
+        clearTimeout(that.spinTimeout);
+
+        var degrees = that.startAngle * 180 / Math.PI + 90;
+        var arcd = that.arc * 180 / Math.PI;
+        var index = Math.floor((360 - degrees % 360) / arcd);
+        console.log(that.rewards[index]);
+    };
+
+    LuckyWheel.prototype.easeOut = function(t, b, c, d) {
+        var ts = (t/=d)*t;
+        var tc = ts*t;
+        return b+c*(tc + -3*ts + 3*t);
+    };
+
+    var lw = new LuckyWheel('data.json');
+    lw.init();
+
+    $('#spinBtn').click(function() {
+        lw.spin();
+    });
+
+</script>
+</body>
+</html>
