@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>EaselJS Example: Infinite Hearts</title>
+
+    <link href="../EaselJS-master/_assets/css/shared.css" rel="stylesheet" type="text/css"/>
+    <link href="../EaselJS-master/_assets/css/examples.css" rel="stylesheet" type="text/css"/>
+    <script src="../EaselJS-master/_assets/js/examples.js"></script>
+
+    <script src="../EaselJS-master/lib/easeljs-NEXT.combined.js"></script>
+    <!-- We also provide hosted minified versions of all CreateJS libraries.
+      http://code.createjs.com -->
+
+    <script id="editable">
+        var canvas;
+        var stage;
+        var container;
+        var captureContainers;
+        var captureIndex;
+        var counts = 50;
+        var cacheCounts = 50;
+
+        function init() {
+            // create a new stage and point it at our canvas:
+            canvas = document.getElementById("testCanvas");
+            stage = new createjs.Stage(canvas);
+
+            var w = canvas.width;
+            var h = canvas.height;
+
+            container = new createjs.Container();
+            stage.addChild(container);
+
+            captureContainers = [];
+            captureIndex = 0;
+
+            // create a large number of slightly complex vector shapes, and give them random positions and velocities:
+            for (var i = 0; i < counts; i++) {
+
+                var circle = new createjs.Shape();
+                circle.graphics.beginFill('white').drawCircle(10, 10, 40);
+                circle.y = -100;
+                container.addChild(circle);
+            }
+
+            for (i = 0; i < counts; i++) {
+                var captureContainer = new createjs.Container();
+                captureContainer.cache(0, 0, w, h);
+                captureContainers.push(captureContainer);
+            }
+
+            // start the tick and point it at the window so we can do some work before updating the stage:
+            createjs.Ticker.timingMode = createjs.Ticker.RAF;
+//            createjs.Ticker.framerate = 30;
+            createjs.Ticker.addEventListener("tick", tick);
+        }
+
+        function tick(event) {
+            var w = canvas.width;
+            var h = canvas.height;
+            var l = container.getNumChildren();
+            console.log(l);
+            captureIndex = (captureIndex + 1) % captureContainers.length;
+            stage.removeChildAt(0);
+            var captureContainer = captureContainers[captureIndex];
+            stage.addChildAt(captureContainer, 0);
+            captureContainer.addChild(container);
+
+            for (var i= 0; i < l; i ++) {
+                var circle = container.getChildAt(i);
+
+                if (circle.y < -50) {
+                    circle.x = w / 2;
+                    circle.y = h - 50;
+
+                    circle.perX = (1 + Math.random() * 2) * h / 10;
+                    circle.offX = Math.random() * h;
+                    circle.ampX= circle.perX * 0.01 * (0.1 + Math.random()) * (Math.random() > 0.5 ? -1 : 1);
+
+                    circle.velY = -Math.random() * 5 - 2;
+
+                    circle.scaleX = circle.scaleY = Math.random() / 100 + 0.1;
+                    circle.velS = Math.random() / 100;
+
+                    circle.alpha = Math.random() * 0.1;
+//                    circle.alpha = 1;
+                }
+
+                circle.y += circle.velY * circle.scaleX / 2 * 10;
+                circle.x += circle.ampX * 2;
+                var _s = circle.scaleX + circle.velS;
+                if (_s > 3) {
+                    _s = 3;
+                }
+                circle.scaleX = circle.scaleY = _s;
+                circle.alpha += 0.01;
+            }
+            captureContainer.updateCache();
+
+
+            // draw the updates to stage:
+            stage.update(event);
+        }
+
+    </script>
+</head>
+
+<body onload="init();">
+
+<header class="EaselJS">
+    <h1>Infinte Hearts</h1>
+
+    <p>Infinte hearts: code poetry for Valentine's day. Uses
+        <code>updateCache()</code> with multiple caches to
+        create an "infinite bobs" effect.
+    </p>
+</header>
+
+<div>
+    <canvas id="testCanvas" height="700" width="400"
+            style="background:#312"></canvas>
+</div>
+</body>
+</html>
