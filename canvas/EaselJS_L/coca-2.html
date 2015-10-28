@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>EaselJS Example: Infinite Hearts</title>
+
+    <script src="../EaselJS-master/lib/easeljs-NEXT.combined.js"></script>
+    <!-- We also provide hosted minified versions of all CreateJS libraries.
+      http://code.createjs.com -->
+
+    <script src="../jquery-2.1.0.min.js"></script>
+    <script id="editable">
+        var canvas;
+        var stage;
+        var container;
+        var captureContainers;
+        var captureIndex;
+        var counts = 100;
+        var cc = 0;
+        var pattern = '';
+        var maxSize = 1;
+        var shaked = false;
+        var shakeContainer;
+
+        function addCircles(num, circle) {
+            for (var i = 0; i < num; i++) {
+
+                var circle = new createjs.Shape();
+                if (Math.random() > 0.8) {
+                    if (!circle) {
+                        circle.graphics.beginFill('white').drawCircle(10, 10, 20);
+                    } else {
+                        circle.graphics.s('white').ss(7).dc(10, 10, 20);
+                    }
+                } else {
+                    circle.graphics.beginFill('white').drawCircle(10, 10, 25);
+                }
+                circle.y = -200;
+                container.addChild(circle);
+            }
+        }
+
+        function addBackboard() {
+            var board = new createjs.Shape();
+            board.graphics.f('white').dr(0, 0, canvas.width, canvas.height*0.6);
+            board.visible = 0;
+            stage.addChild(board);
+        }
+
+        function init() {
+            // create a new stage and point it at our canvas:
+            canvas = document.getElementById("testCanvas");
+            stage = new createjs.Stage(canvas);
+
+            var w = canvas.width;
+            var h = canvas.height;
+
+            container = new createjs.Container();
+            stage.addChild(container);
+
+            captureContainers = [];
+            captureIndex = 0;
+
+            // create a large number of slightly complex vector shapes, and give them random positions and velocities:
+
+            addCircles(counts);
+
+            for (i = 0; i < counts; i++) {
+                var captureContainer = new createjs.Container();
+                captureContainer.cache(0, 0, w, h);
+                captureContainers.push(captureContainer);
+            }
+
+            shakeContainer = new createjs.Container();
+            shakeContainer.cache(0, 0, w, h);
+
+            // start the tick and point it at the window so we can do some work before updating the stage:
+            createjs.Ticker.timingMode = createjs.Ticker.RAF;
+//            createjs.Ticker.framerate = 30;
+            createjs.Ticker.addEventListener("tick", tick);
+        }
+
+        function tick(event) {
+            var w = canvas.width;
+            var h = canvas.height;
+            var l = container.getNumChildren();
+           if (shaked) {
+               stage.removeChildAt(0);
+               var captureContainer = shakeContainer;
+               stage.addChildAt(captureContainer, 0);
+               captureContainer.addChild(container);
+               for (var i = 0; i < l; i ++) {
+                   var c = container.getChildAt(i)
+                   c.x = 100;
+                   c.y = 200;
+               }
+               captureContainer.updateCache();
+           } else {
+               captureIndex = (captureIndex + 1) % captureContainers.length;
+               stage.removeChildAt(0);
+               var captureContainer = captureContainers[captureIndex];
+               stage.addChildAt(captureContainer, 0);
+               captureContainer.addChild(container);
+
+               if (cc < l) { cc += 1; }
+
+               for (var i= 0; i < cc; i ++) {
+                   var circle = container.getChildAt(i);
+
+                   if (circle.y < -150 || circle.x < -150) {
+                       circle.x = w / 2;
+                       circle.y = h - 150;
+
+                       circle.perX = (1 + Math.random() * 1) * h / (10 + 5);
+                       circle.velY = (- Math.random() * 4 - 1) * 5;
+                       if (maxSize !== 1) {
+                           circle.velY = circle.velY / (maxSize * 3);
+                           circle.perX = circle.perX * maxSize / 2;
+                       }
+
+                       circle.direction = Math.random() > 0.5 ? -1 : 1;
+                       circle.direction = Math.random() > 0.95 ? 0 : circle.direction;
+
+                       circle.ampX = circle.perX * 0.015 * (0.1 + Math.random()) * circle.direction;
+
+
+                       circle.scaleX = circle.scaleY = Math.random() / 100 + 0.1;
+                       circle.velS = Math.random() / 100 * maxSize;
+
+
+                       circle.alpha = Math.random() * 0.1;
+                   }
+
+                   circle.y += circle.velY * circle.scaleX / 2;
+                   circle.x += circle.ampX;
+                   var _s = circle.scaleX + circle.velS;
+                   if (_s > maxSize) {
+                       _s = maxSize;
+                   }
+                   circle.scaleX = circle.scaleY = _s;
+                   circle.alpha += 0.008 * maxSize;
+
+               }
+                captureContainer.updateCache(pattern);
+           }
+
+//            captureContainer.updateCache('source-over');
+
+
+            // draw the updates to stage:
+            stage.update(event);
+        }
+
+        $(function () {
+            $('button').click(function () {
+//                addCircles(50, 'circle');
+                maxSize = 4;
+
+//                setTimeout(function () {
+//                    pattern = 'source-over';
+//                }, 5000);
+                shaked = true;
+            });
+        })
+    </script>
+</head>
+
+<body onload="init();">
+
+<div>
+    <canvas id="testCanvas" height="700" width="400"
+            style="background:#312"></canvas>
+</div>
+<button>shake</button>
+</body>
+</html>
