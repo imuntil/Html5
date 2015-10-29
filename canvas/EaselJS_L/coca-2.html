@@ -4,11 +4,10 @@
     <meta charset="utf-8">
     <title>EaselJS Example: Infinite Hearts</title>
 
-    <script src="../EaselJS-master/lib/easeljs-NEXT.combined.js"></script>
-    <!-- We also provide hosted minified versions of all CreateJS libraries.
-      http://code.createjs.com -->
-
-    <script src="../jquery-2.1.0.min.js"></script>
+    <!--<script src="../EaselJS-master/lib/easeljs-NEXT.combined.js"></script>-->
+    <!--<script src="../jquery-2.1.0.min.js"></script>-->
+    <script src="easeljs-NEXT.combined.js"></script>
+    <script src="jquery-2.1.0.min.js"></script>
     <script id="editable">
         var canvas;
         var stage;
@@ -16,35 +15,30 @@
         var containerClone;
         var captureContainers;
         var captureIndex;
-        var counts = 100;
+        var counts = 50;
         var cc = 0;
+        var scc = 0;
         var pattern = '';
         var maxSize = 1;
         var shaked = false;
 
-        function addCircles(num, circle) {
+        function addCircles(num, _circle, container) {
             for (var i = 0; i < num; i++) {
 
                 var circle = new createjs.Shape();
-                if (Math.random() > 0.8) {
-                    if (!circle) {
-                        circle.graphics.beginFill('white').drawCircle(10, 10, 20);
+                if (Math.random() > 0.6) {
+                    if (!_circle) {
+                        circle.graphics.f('white').dc(10, 10, 25);
                     } else {
                         circle.graphics.s('white').ss(7).dc(10, 10, 20);
                     }
                 } else {
-                    circle.graphics.beginFill('white').drawCircle(10, 10, 25);
+                    circle.graphics.f('white').dc(10, 10, 25);
                 }
-                circle.y = -200;
+
+                _circle ? circle.y = -200 : circle.y = -500;
                 container.addChild(circle);
             }
-        }
-
-        function addBackboard() {
-            var board = new createjs.Shape();
-            board.graphics.f('white').dr(0, 0, canvas.width, canvas.height*0.6);
-            board.visible = 0;
-            stage.addChild(board);
         }
 
         function init() {
@@ -56,18 +50,18 @@
             var h = canvas.height;
 
             container = new createjs.Container();
-//            stage.addChild(container);
+            containerClone = new createjs.Container();
 
             captureContainers = [];
             captureIndex = 0;
 
             // create a large number of slightly complex vector shapes, and give them random positions and velocities:
 
-            addCircles(counts);
+            addCircles(counts, true, container);
+            addCircles(counts, false, containerClone);
 
-            containerClone = container.clone(true);
 
-            for (i = 0; i < 2; i++) {
+            for (var i = 0; i < 2; i++) {
                 var captureContainer = new createjs.Container();
                 captureContainer.cache(0, 0, w, h);
                 captureContainers.push(captureContainer);
@@ -134,41 +128,31 @@
                var shakeContainer = captureContainers[1];
                stage.addChildAt(shakeContainer, 1);
                shakeContainer.addChild(containerClone);
-               for (var i = 0; i < l; i ++) {
-                   var circle = containerClone.getChildAt(i)
+               if (scc < l) { scc += 1; }
+               for (var i = 0; i < scc; i ++) {
+                   var circle = containerClone.getChildAt(i);
 
-                   if (circle.y < -150 || circle.x < -150) {
+                   if (circle.y <= -500 || circle.x <= -500) {
                        circle.x = w / 2;
                        circle.y = h - 150;
 
                        circle.perX = (1 + Math.random() * 1) * h / (10 + 5);
-                       circle.velY = (- Math.random() * 4 - 1) * 5;
-                       if (maxSize !== 1) {
-                           circle.velY = circle.velY / (maxSize * 3);
-                           circle.perX = circle.perX * maxSize / 2;
-                       }
+                       circle.velY = (- Math.random() * 4 - 1) * 2 / maxSize;
 
                        circle.direction = Math.random() > 0.5 ? -1 : 1;
                        circle.direction = Math.random() > 0.95 ? 0 : circle.direction;
 
                        circle.ampX = circle.perX * 0.015 * (0.1 + Math.random()) * circle.direction;
 
-
                        circle.scaleX = circle.scaleY = Math.random() / 100 + 0.1;
                        circle.velS = Math.random() / 100 * maxSize;
-
-
-                       circle.alpha = Math.random() * 0.1;
                    }
 
                    circle.y += circle.velY * circle.scaleX / 2;
                    circle.x += circle.ampX;
                    var _s = circle.scaleX + circle.velS;
-                   if (_s > maxSize) {
-                       _s = maxSize;
-                   }
+
                    circle.scaleX = circle.scaleY = _s;
-                   circle.alpha += 0.008 * maxSize;
                }
 
                shakeContainer.updateCache();
@@ -181,12 +165,7 @@
 
         $(function () {
             $('button').click(function () {
-//                addCircles(50, 'circle');
                 maxSize = 4;
-
-//                setTimeout(function () {
-//                    pattern = 'source-over';
-//                }, 5000);
                 shaked = true;
             });
         })
