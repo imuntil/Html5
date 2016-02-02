@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title></title>
+    <script src="zepto.js"></script>
+    <style>
+        ul li {
+            float:left;
+            width: 100px;
+            height: 100px;
+        }
+    </style>
+</head>
+<body>
+<ul>
+
+</ul>
+<br/>
+<a id="a" href="javascript:void(0);">choose</a>
+<br/>
+<br/>
+<input type="file" accept="image/*" id="single" style="position: absolute;bottom: 0;visibility:hidden"/>
+<input type="file" multiple accept="image/*" id="multiple" style="position: absolute;bottom: 0;visibility:hidden"/>
+<script>
+    $(function () {
+
+        var BASE64s = [], index = undefined;
+
+        function handleFiles(e) {
+            var event = e || window.event, files = event.files;
+            window.URL = window.URL || window.webkitURL;
+            for (var i = 0; i < files.length; i ++) {
+                var img = new Image();
+                img.src = window.URL.createObjectURL(files[i]);
+                img.onload = onLoadImage;
+            }
+        }
+
+        function onLoadImage() {
+            var canvas = document.createElement('canvas');
+            canvas.width = this.width;
+            canvas.height = this.height;
+            canvas.getContext('2d').drawImage(this, 0, 0, canvas.width, canvas.height);
+
+            var data = canvas.toDataURL();
+            if (index === undefined) {
+                var li = document.createElement('li');
+                $(li).css({
+                    'background':'url('+ data +') no-repeat center center',
+                    'backgroundSize':'cover'
+                }).appendTo('ul');
+
+                BASE64s.push(data);
+            } else {
+                $('ul li').eq(index).css({
+                    'background':'url('+ data +') no-repeat center center',
+                    'backgroundSize':'cover'
+                });
+
+                BASE64s.splice(index, 1, data);
+            }
+            index = undefined;
+            window.URL.revokeObjectURL(this.src);
+        }
+
+        function replaceFiles(e) {
+            var event = e || window.event, file = event.files[0];
+            window.URL = window.URL || window.webkitURL;
+            var img = new Image();
+            img.src = window.URL.createObjectURL(file);
+            index = $('#single').data('index') || undefined;
+            img.onload = onLoadImage;
+        }
+
+        function removeFile(_index) {
+            $('ul li').eq(_index).remove();
+            BASE64s.splice(_index, 1);
+        }
+
+        $('#a').click(function () {
+            $('#multiple').trigger('click');
+        });
+        $('#multiple').change(function () {
+            handleFiles(this);
+        });
+        $('#single').change(function () {
+            replaceFiles(this);
+        });
+        $('ul').on('click', 'li', function () {
+            $('#single').data('index', $(this).index()).trigger('click');
+        });
+    });
+</script>
+</body>
+</html>
